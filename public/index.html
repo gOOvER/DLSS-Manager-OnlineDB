@@ -170,6 +170,27 @@
       .btn-danger:hover {
         background: rgba(239, 68, 68, 0.28);
       }
+      .btn-discord {
+        background: #5865f2;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 12px 22px;
+        font-size: 0.96rem;
+        font-weight: 700;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(88, 101, 242, 0.35);
+      }
+      .btn-discord:hover {
+        background: #4752c4;
+      }
+      .discord-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid rgba(88, 101, 242, 0.5);
+        flex-shrink: 0;
+      }
       .panel {
         background: var(--panel);
         border: 1px solid var(--border);
@@ -493,48 +514,62 @@
         <div class="grid" id="games-grid"></div>
       </section>
 
-      <!-- TAB 2: USER ACCOUNT & PERSONAL API KEY -->
+      <!-- TAB 2: USER ACCOUNT & PERSONAL API KEY (MANDATORY DISCORD OAUTH2) -->
       <section class="view-pane" id="pane-account">
-        <!-- Unauthenticated Login / Register View -->
-        <div id="auth-guest-view" class="two-col">
-          <div class="panel">
-            <h3 style="margin-bottom:6px" data-i18n="login_title">🔐 Anmelden</h3>
-            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px" data-i18n="login_sub">
-              Melde dich an, um deinen persönlichen API Key für <strong>DLSS Manager</strong> einzusehen oder neu zu generieren.
-            </p>
-            <div class="form-group">
-              <label data-i18n="lbl_user_or_mail">Benutzername oder E-Mail</label>
-              <input type="text" id="login-username" class="input" data-i18n-placeholder="lbl_user_or_mail" placeholder="Benutzername oder E-Mail" />
+        <!-- Unauthenticated Mandatory Discord Login / Register View -->
+        <div id="auth-guest-view" style="max-width:680px;margin:0 auto">
+          <div class="panel" style="text-align:center;padding:32px 26px">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:rgba(88,101,242,0.16);border:1px solid rgba(88,101,242,0.4);margin-bottom:14px">
+              <svg width="36" height="28" viewBox="0 0 127.14 96.36" fill="#5865F2">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+              </svg>
             </div>
-            <div class="form-group">
-              <label data-i18n="lbl_password">Passwort</label>
-              <input type="password" id="login-password" class="input" placeholder="••••••••" />
-            </div>
-            <button class="btn btn-primary" onclick="handleLogin()" style="width:100%;justify-content:center;margin-top:4px" data-i18n="btn_login">
-              Anmelden
-            </button>
-          </div>
 
-          <div class="panel">
-            <h3 style="margin-bottom:6px" data-i18n="reg_title">✨ Account &amp; eigenen API Key erstellen</h3>
-            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px" data-i18n="reg_sub">
-              Jeder Nutzer erhält sofort einen eigenen API Key (<code>dlss_live_...</code>). <em>Hinweis: Der allererste registrierte Account wird automatisch als <strong>Admin</strong> eingerichtet!</em>
+            <h2 style="font-size:1.35rem;margin-bottom:8px" data-i18n="discord_auth_title">
+              Anmeldung &amp; Registrierung über Discord
+            </h2>
+            <p style="color:var(--muted);font-size:0.88rem;max-width:540px;margin:0 auto 22px" data-i18n="discord_auth_sub">
+              Um Missbrauch zu verhindern, erfolgt die Authentifizierung auf <strong>dlssdb.goover.dev</strong> verpflichtend über deinen <strong>Discord-Account</strong>. Beim ersten Login wird dein Account inklusive persönlichem <code>dlss_live_...</code> API Key sofort automatisch erstellt.
             </p>
-            <div class="form-group">
-              <label data-i18n="lbl_username">Benutzername</label>
-              <input type="text" id="reg-username" class="input" placeholder="z.B. goover" />
+
+            <a href="/api/auth/discord" class="btn btn-discord" style="width:100%;max-width:380px;margin:0 auto">
+              <svg width="22" height="17" viewBox="0 0 127.14 96.36" fill="currentColor">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+              </svg>
+              <span data-i18n="btn_discord_login">Mit Discord anmelden / registrieren</span>
+            </a>
+
+            <div style="margin-top:20px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font-size:0.78rem;color:var(--muted)">
+              <span data-i18n="discord_perk_1">⚡ Sofortiger persönlicher API Key</span>
+              <span>•</span>
+              <span data-i18n="discord_perk_2">🛡️ Automatische Admin-Verknüpfung über E-Mail</span>
+              <span>•</span>
+              <span data-i18n="discord_perk_3">🔒 Kein zusätzliches Passwort nötig</span>
             </div>
-            <div class="form-group">
-              <label data-i18n="lbl_email">E-Mail-Adresse</label>
-              <input type="email" id="reg-email" class="input" placeholder="name@example.com" />
-            </div>
-            <div class="form-group">
-              <label data-i18n="lbl_password_min">Passwort (mind. 6 Zeichen)</label>
-              <input type="password" id="reg-password" class="input" placeholder="••••••••" />
-            </div>
-            <button class="btn btn-primary" onclick="handleRegister()" style="width:100%;justify-content:center;margin-top:4px" data-i18n="btn_register">
-              Registrieren &amp; API Key generieren
-            </button>
+
+            <details id="discord-setup-details" style="margin-top:24px;text-align:left;background:#0e131b;border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:0.81rem">
+              <summary style="cursor:pointer;font-weight:700;color:#7dd3fc" data-i18n="discord_setup_summary">
+                ⚙️ Admin-Hinweis: Discord OAuth2 in Cloudflare einrichten (1 Minute)
+              </summary>
+              <div style="margin-top:10px;color:#cbd5e1;line-height:1.65">
+                <ol style="padding-left:18px">
+                  <li>Öffne das <a href="https://discord.com/developers/applications" target="_blank" style="color:var(--blue)">Discord Developer Portal ↗</a> und klicke auf <strong>New Application</strong>.</li>
+                  <li>Klicke links auf <strong>OAuth2</strong> und trage unter <strong>Redirects</strong> exakt diese URL ein:
+                    <div style="margin:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                      <code style="background:#080b10;padding:5px 10px;border-radius:6px;color:#bef264;border:1px solid rgba(118,185,0,0.3)">https://dlssdb.goover.dev/api/auth/discord/callback</code>
+                      <button class="btn btn-sm" onclick="navigator.clipboard.writeText('https://dlssdb.goover.dev/api/auth/discord/callback');showToast('📋 Redirect URI kopiert!')">📋 Copy</button>
+                    </div>
+                  </li>
+                  <li>Kopiere im Discord Portal unter <strong>OAuth2</strong> die <strong>CLIENT ID</strong> und das <strong>CLIENT SECRET</strong> (Reset Secret).</li>
+                  <li>Öffne dein Cloudflare Dashboard → <strong>Workers und Pages</strong> → <strong>dlss-manager-onlinedb</strong> → <strong>Einstellungen</strong> → <strong>Variablen und Geheimnisse</strong> und füge diese 2 Variablen hinzu:
+                    <ul style="padding-left:18px;margin-top:4px;font-family:Consolas,monospace;color:#7dd3fc">
+                      <li>DISCORD_CLIENT_ID</li>
+                      <li>DISCORD_CLIENT_SECRET</li>
+                    </ul>
+                  </li>
+                </ol>
+              </div>
+            </details>
           </div>
         </div>
 
@@ -542,12 +577,16 @@
         <div id="auth-user-view" style="display:none">
           <div class="panel">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-              <div>
-                <h3 style="display:flex;align-items:center;gap:10px">
-                  <span id="user-greeting">Willkommen!</span>
-                  <span class="badge" id="user-role-badge">USER</span>
-                </h3>
-                <p style="color:var(--muted);font-size:0.82rem" id="user-email-line"></p>
+              <div style="display:flex;align-items:center;gap:12px">
+                <img id="user-discord-avatar" class="discord-avatar" src="" alt="Discord Avatar" style="display:none;width:44px;height:44px" />
+                <div>
+                  <h3 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <span id="user-greeting">Willkommen!</span>
+                    <span class="badge" id="user-role-badge">USER</span>
+                    <span class="badge badge-blue" id="user-discord-badge" style="background:rgba(88,101,242,0.18);color:#c7d2fe;border-color:rgba(88,101,242,0.45)">Discord Verified</span>
+                  </h3>
+                  <p style="color:var(--muted);font-size:0.82rem" id="user-email-line"></p>
+                </div>
               </div>
               <button class="btn btn-danger" onclick="handleLogout()" data-i18n="btn_logout">🚪 Abmelden</button>
             </div>
@@ -590,12 +629,10 @@
             </div>
 
             <div class="panel">
-              <h3 style="margin-bottom:8px" data-i18n="change_pw_title">🔒 Passwort ändern</h3>
-              <div class="form-group">
-                <label data-i18n="lbl_new_password">Neues Passwort (mind. 6 Zeichen)</label>
-                <input type="password" id="new-password-input" class="input" placeholder="••••••••" />
-              </div>
-              <button class="btn btn-primary" onclick="handleChangePassword()" data-i18n="btn_save_password">💾 Passwort aktualisieren</button>
+              <h3 style="margin-bottom:8px" data-i18n="discord_linked_title">🎮 Verknüpfter Discord-Account</h3>
+              <p style="color:var(--muted);font-size:0.84rem;line-height:1.6" id="discord-linked-info">
+                Dein Account ist fest mit Discord OAuth2 verknüpft. Eine separate Passwortverwaltung ist nicht erforderlich.
+              </p>
             </div>
           </div>
         </div>
@@ -825,19 +862,18 @@
           ac_badge_signed_only: "🛡️ Nur signierte DLLs",
           ac_badge_driver_override_only: "🎛️ Nur Treiber-Override",
           ac_badge_blocked: "⛔ Gesperrt",
-          login_title: "🔐 Anmelden",
-          login_sub:
-            "Melde dich an, um deinen persönlichen API Key für <strong>DLSS Manager</strong> einzusehen oder neu zu generieren.",
-          lbl_user_or_mail: "Benutzername oder E-Mail",
-          lbl_password: "Passwort",
-          btn_login: "Anmelden",
-          reg_title: "✨ Account & eigenen API Key erstellen",
-          reg_sub:
-            "Jeder Nutzer erhält sofort einen eigenen API Key (<code>dlss_live_...</code>). <em>Hinweis: Der allererste registrierte Account wird automatisch als <strong>Admin</strong> eingerichtet!</em>",
-          lbl_username: "Benutzername",
-          lbl_email: "E-Mail-Adresse",
-          lbl_password_min: "Passwort (mind. 6 Zeichen)",
-          btn_register: "Registrieren & API Key generieren",
+          discord_auth_title: "Anmeldung & Registrierung über Discord",
+          discord_auth_sub:
+            "Um Missbrauch zu verhindern, erfolgt die Authentifizierung auf <strong>dlssdb.goover.dev</strong> verpflichtend über deinen <strong>Discord-Account</strong>. Beim ersten Login wird dein Account inklusive persönlichem <code>dlss_live_...</code> API Key sofort automatisch erstellt.",
+          btn_discord_login: "Mit Discord anmelden / registrieren",
+          discord_perk_1: "⚡ Sofortiger persönlicher API Key",
+          discord_perk_2: "🛡️ Automatische Admin-Verknüpfung über E-Mail",
+          discord_perk_3: "🔒 Kein zusätzliches Passwort nötig",
+          discord_setup_summary:
+            "⚙️ Admin-Hinweis: Discord OAuth2 in Cloudflare einrichten (1 Minute)",
+          discord_linked_title: "🎮 Verknüpfter Discord-Account",
+          discord_linked_desc:
+            "Dein Account ist fest über Discord OAuth2 verifiziert. Eine separate Passwortverwaltung ist nicht erforderlich.",
           btn_logout: "🚪 Abmelden",
           lbl_personal_key: "DEIN PERSÖNLICHER DLSS-DB API KEY",
           btn_show_hide: "👁️ Zeigen/Verbergen",
@@ -890,6 +926,9 @@
           btn_suspend: "⏸️ Sperren",
           btn_activate: "▶️ Aktivieren",
           modal_create_user_title: "➕ Neuen Benutzer anlegen",
+          lbl_username: "Benutzername",
+          lbl_email: "E-Mail-Adresse",
+          lbl_password_min: "Passwort (mind. 6 Zeichen)",
           btn_cancel: "Abbrechen",
           btn_create_user_submit: "✓ Benutzer & API Key erstellen",
           gm_lbl_id: "Eindeutige ID (Slug, z.B. <code>starcitizen</code>)",
@@ -931,19 +970,18 @@
           ac_badge_signed_only: "🛡️ Signed DLLs Only",
           ac_badge_driver_override_only: "🎛️ Driver Override Only",
           ac_badge_blocked: "⛔ Blocked",
-          login_title: "🔐 Sign In",
-          login_sub:
-            "Sign in to view or regenerate your personal API Key for <strong>DLSS Manager</strong>.",
-          lbl_user_or_mail: "Username or Email",
-          lbl_password: "Password",
-          btn_login: "Sign In",
-          reg_title: "✨ Create Account & Personal API Key",
-          reg_sub:
-            "Every user immediately receives a personal API Key (<code>dlss_live_...</code>). <em>Note: The very first registered account is automatically granted <strong>Admin</strong> privileges!</em>",
-          lbl_username: "Username",
-          lbl_email: "Email Address",
-          lbl_password_min: "Password (min. 6 characters)",
-          btn_register: "Register & Generate API Key",
+          discord_auth_title: "Sign In & Register with Discord",
+          discord_auth_sub:
+            "To prevent abuse, authentication on <strong>dlssdb.goover.dev</strong> requires a <strong>Discord account</strong>. On your first sign-in, your account and personal <code>dlss_live_...</code> API Key are created automatically.",
+          btn_discord_login: "Sign In / Register with Discord",
+          discord_perk_1: "⚡ Instant personal API Key",
+          discord_perk_2: "🛡️ Automatic Admin account linking via email",
+          discord_perk_3: "🔒 No separate password required",
+          discord_setup_summary:
+            "⚙️ Admin Note: Set up Discord OAuth2 in Cloudflare (1 minute)",
+          discord_linked_title: "🎮 Linked Discord Account",
+          discord_linked_desc:
+            "Your account is verified via Discord OAuth2. No separate password is required.",
           btn_logout: "🚪 Sign Out",
           lbl_personal_key: "YOUR PERSONAL DLSS-DB API KEY",
           btn_show_hide: "👁️ Show/Hide",
@@ -996,6 +1034,9 @@
           btn_suspend: "⏸️ Suspend",
           btn_activate: "▶️ Activate",
           modal_create_user_title: "➕ Create New User",
+          lbl_username: "Username",
+          lbl_email: "Email Address",
+          lbl_password_min: "Password (min. 6 characters)",
           btn_cancel: "Cancel",
           btn_create_user_submit: "✓ Create User & API Key",
           gm_lbl_id: "Unique ID (Slug, e.g. <code>starcitizen</code>)",
@@ -1339,7 +1380,7 @@
         const adminTabBtn = document.getElementById("tab-btn-admin");
 
         if (!currentUser) {
-          guestEl.style.display = "grid";
+          guestEl.style.display = "block";
           userEl.style.display = "none";
           adminTabBtn.style.display = "none";
           return;
@@ -1354,6 +1395,25 @@
         rBadge.textContent = currentUser.role.toUpperCase();
         rBadge.className = currentUser.role === "admin" ? "badge" : "badge badge-blue";
         document.getElementById("user-email-line").textContent = `${currentUser.email} · ${t("account_created_on")} ${new Date(currentUser.created_at).toLocaleDateString()}`;
+
+        const avatarEl = document.getElementById("user-discord-avatar");
+        if (avatarEl) {
+          if (currentUser.discord_avatar) {
+            avatarEl.src = currentUser.discord_avatar;
+            avatarEl.style.display = "block";
+          } else {
+            avatarEl.style.display = "none";
+          }
+        }
+
+        const linkedInfoEl = document.getElementById("discord-linked-info");
+        if (linkedInfoEl) {
+          linkedInfoEl.innerHTML = currentUser.discord_id
+            ? `${t("discord_linked_desc")}<div style="margin-top:8px;font-family:Consolas,monospace;font-size:0.8rem;color:#c7d2fe">Discord ID: <strong>${esc(
+                currentUser.discord_id
+              )}</strong> · Tag: <strong>${esc(currentUser.username)}</strong></div>`
+            : t("discord_linked_desc");
+        }
 
         const keyEl = document.getElementById("user-api-key-display");
         if (!currentUser.api_key) {
@@ -1506,11 +1566,22 @@
             return `
           <tr>
             <td>
-              <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
-                <span style="color:var(--muted);font-family:Consolas,monospace;font-size:0.78rem">#${u.id}</span>
-                <strong>${esc(u.username)}</strong>
+              <div style="display:flex;align-items:center;gap:8px;white-space:nowrap">
+                ${
+                  u.discord_avatar
+                    ? `<img src="${esc(u.discord_avatar)}" class="discord-avatar" style="width:28px;height:28px" alt="" />`
+                    : ""
+                }
+                <div>
+                  <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+                    <span style="color:var(--muted);font-family:Consolas,monospace;font-size:0.78rem">#${u.id}</span>
+                    <strong>${esc(u.username)}</strong>
+                  </div>
+                  <div style="color:var(--muted);font-size:0.74rem;margin-top:1px">
+                    ${esc(u.email)}${u.discord_id ? ` · <span style="color:#818cf8">Discord: ${esc(u.discord_id)}</span>` : ""}
+                  </div>
+                </div>
               </div>
-              <div style="color:var(--muted);font-size:0.75rem;margin-top:2px">${esc(u.email)}</div>
             </td>
             <td style="white-space:nowrap">
               <div style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
@@ -1810,6 +1881,35 @@
       // INITIALIZATION
       async function init() {
         setLanguage(currentLang);
+
+        // Handle OAuth2 callback query parameters (?discord_token=... or ?auth_error=...)
+        const params = new URLSearchParams(window.location.search);
+        const discordToken = params.get("discord_token");
+        const authError = params.get("auth_error");
+
+        if (discordToken) {
+          authToken = discordToken;
+          localStorage.setItem("dlssdb_token", authToken);
+          revealMyKey = true;
+          window.history.replaceState({}, "", window.location.pathname + "#account");
+          switchTab("account");
+        } else if (authError) {
+          window.history.replaceState({}, "", window.location.pathname + "#account");
+          switchTab("account");
+          if (authError === "DISCORD_NOT_CONFIGURED") {
+            const detailsEl = document.getElementById("discord-setup-details");
+            if (detailsEl) detailsEl.open = true;
+            showToast(
+              "⚙️ Bitte zuerst DISCORD_CLIENT_ID & DISCORD_CLIENT_SECRET in Cloudflare hinterlegen (siehe Anleitung unten).",
+              true
+            );
+          } else {
+            showToast(authError, true);
+          }
+        } else if (window.location.hash === "#account") {
+          switchTab("account");
+        }
+
         try {
           const r = await fetch("./api/v1/games.json?web_preview=1");
           const data = await r.json();
@@ -1823,6 +1923,9 @@
           try {
             const me = await apiRequest("/api/auth/me", "GET");
             currentUser = me.user;
+            if (discordToken && currentUser) {
+              showToast(`✓ Discord Login erfolgreich: ${currentUser.username}`);
+            }
           } catch {
             authToken = null;
             localStorage.removeItem("dlssdb_token");

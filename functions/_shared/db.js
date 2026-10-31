@@ -486,6 +486,8 @@ export async function ensureDbSchema(db) {
       username TEXT NOT NULL UNIQUE COLLATE NOCASE,
       email TEXT NOT NULL UNIQUE COLLATE NOCASE,
       password_hash TEXT NOT NULL,
+      discord_id TEXT UNIQUE,
+      discord_avatar TEXT,
       role TEXT NOT NULL DEFAULT 'user',
       api_key TEXT UNIQUE,
       api_key_created_at TEXT,
@@ -509,6 +511,25 @@ export async function ensureDbSchema(db) {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`),
   ]);
+
+  // Auto-migrate existing users table if discord_id / discord_avatar columns do not exist yet
+  try {
+    await db.prepare("ALTER TABLE users ADD COLUMN discord_id TEXT").run();
+  } catch {
+    // column already exists
+  }
+  try {
+    await db.prepare("ALTER TABLE users ADD COLUMN discord_avatar TEXT").run();
+  } catch {
+    // column already exists
+  }
+  try {
+    await db
+      .prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_discord_id ON users(discord_id)")
+      .run();
+  } catch {
+    // index already exists
+  }
 
   const countRow = await db.prepare("SELECT COUNT(*) as cnt FROM games").first();
   if (!countRow || Number(countRow.cnt) === 0) {
@@ -535,7 +556,7 @@ export async function getAuthenticatedUser(request, db) {
   const now = new Date().toISOString();
   const row = await db
     .prepare(
-      `SELECT u.id, u.username, u.email, u.role, u.api_key, u.api_key_created_at,
+      `SELECT u.id, u.username, u.email, u.discord_id, u.discord_avatar, u.role, u.api_key, u.api_key_created_at,
               u.api_requests_count, u.last_api_access, u.is_active, u.created_at
        FROM sessions s
        JOIN users u ON u.id = s.user_id

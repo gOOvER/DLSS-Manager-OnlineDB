@@ -22,7 +22,7 @@ export async function onRequestGet(context) {
 
     const { results: users } = await db
       .prepare(
-        `SELECT id, username, email, role, api_key, api_key_created_at,
+        `SELECT id, username, email, discord_id, discord_avatar, role, api_key, api_key_created_at,
                 api_requests_count, last_api_access, is_active, created_at
          FROM users
          ORDER BY id ASC`

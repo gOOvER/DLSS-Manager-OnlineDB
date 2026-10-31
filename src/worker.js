@@ -2,6 +2,7 @@
 // Routes /api/* requests to our D1 database handlers and serves static assets (index.html) for everything else.
 
 import { optionsResponse, jsonResponse } from "../functions/_shared/db.js";
+import * as discordAuthHandler from "../functions/api/auth/discord.js";
 import * as registerHandler from "../functions/api/auth/register.js";
 import * as loginHandler from "../functions/api/auth/login.js";
 import * as meHandler from "../functions/api/auth/me.js";
@@ -28,6 +29,14 @@ export default {
     try {
       if (path === "/api/v1/games.json" || path === "/api/v1/games") {
         if (method === "GET") return await gamesJsonHandler.onRequestGet(context);
+      }
+
+      if (path === "/api/auth/discord" && method === "GET") {
+        return await discordAuthHandler.onRequestStart(context);
+      }
+
+      if (path === "/api/auth/discord/callback" && method === "GET") {
+        return await discordAuthHandler.onRequestCallback(context);
       }
 
       if (path === "/api/auth/register" && method === "POST") {
