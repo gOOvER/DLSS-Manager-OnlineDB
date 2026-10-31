@@ -547,7 +547,32 @@
               <span data-i18n="discord_perk_3">🔒 Kein zusätzliches Passwort nötig</span>
             </div>
 
-            <details id="discord-setup-details" style="margin-top:24px;text-align:left;background:#0e131b;border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:0.81rem">
+            <!-- Existing Admin Password Sign-In (so pre-existing Admin #1 never needs to re-register via Discord) -->
+            <details style="margin-top:22px;text-align:left;background:#0e131b;border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:0.82rem">
+              <summary style="cursor:pointer;font-weight:700;color:#bef264" data-i18n="admin_pw_login_summary">
+                🛡️ Bestehender Admin-Login (Benutzername &amp; Passwort)
+              </summary>
+              <div style="margin-top:12px">
+                <p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px" data-i18n="admin_pw_login_hint">
+                  Für bereits bestehende Administratoren-Konten (z. B. #1 gOOvER) ohne erneute Discord-Registrierung:
+                </p>
+                <div class="two-col" style="gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+                  <div class="form-group" style="margin-bottom:8px">
+                    <label data-i18n="lbl_user_or_mail">Benutzername oder E-Mail</label>
+                    <input type="text" id="login-username" class="input" placeholder="gOOvER / info@goover.dev" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:8px">
+                    <label data-i18n="lbl_password">Passwort</label>
+                    <input type="password" id="login-password" class="input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()" />
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="handleLogin()" style="width:100%;justify-content:center;margin-top:4px" data-i18n="btn_login">
+                  🔐 Als Admin anmelden
+                </button>
+              </div>
+            </details>
+
+            <details id="discord-setup-details" style="margin-top:12px;text-align:left;background:#0e131b;border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:0.81rem">
               <summary style="cursor:pointer;font-weight:700;color:#7dd3fc" data-i18n="discord_setup_summary">
                 ⚙️ Admin-Hinweis: Discord OAuth2 in Cloudflare einrichten (1 Minute)
               </summary>
@@ -629,10 +654,22 @@
             </div>
 
             <div class="panel">
-              <h3 style="margin-bottom:8px" data-i18n="discord_linked_title">🎮 Verknüpfter Discord-Account</h3>
+              <h3 style="margin-bottom:8px" data-i18n="discord_linked_title">🎮 Discord &amp; Account-Sicherheit</h3>
               <p style="color:var(--muted);font-size:0.84rem;line-height:1.6" id="discord-linked-info">
-                Dein Account ist fest mit Discord OAuth2 verknüpft. Eine separate Passwortverwaltung ist nicht erforderlich.
+                Dein Account ist fest mit Discord OAuth2 verknüpft.
               </p>
+              <div id="admin-link-discord-box" style="margin-top:12px;display:none">
+                <a id="btn-link-existing-discord" href="/api/auth/discord" class="btn btn-discord btn-sm" style="padding:8px 14px;font-size:0.82rem">
+                  🔗 Optional: Bestehenden Admin-Account mit Discord verknüpfen
+                </a>
+              </div>
+              <div id="admin-pw-change-box" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:none">
+                <div class="form-group" style="margin-bottom:8px">
+                  <label data-i18n="lbl_new_password">Admin-Passwort ändern (mind. 6 Zeichen)</label>
+                  <input type="password" id="new-password-input" class="input" placeholder="••••••••" />
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="handleChangePassword()" data-i18n="btn_save_password">💾 Passwort aktualisieren</button>
+              </div>
             </div>
           </div>
         </div>
@@ -871,9 +908,18 @@
           discord_perk_3: "🔒 Kein zusätzliches Passwort nötig",
           discord_setup_summary:
             "⚙️ Admin-Hinweis: Discord OAuth2 in Cloudflare einrichten (1 Minute)",
-          discord_linked_title: "🎮 Verknüpfter Discord-Account",
+          admin_pw_login_summary:
+            "🛡️ Bestehender Admin-Login (Benutzername & Passwort)",
+          admin_pw_login_hint:
+            "Für bereits bestehende Administratoren-Konten (z. B. #1 gOOvER) ohne erneute Discord-Registrierung:",
+          lbl_user_or_mail: "Benutzername oder E-Mail",
+          lbl_password: "Passwort",
+          btn_login: "🔐 Als Admin anmelden",
+          discord_linked_title: "🎮 Discord & Account-Sicherheit",
           discord_linked_desc:
-            "Dein Account ist fest über Discord OAuth2 verifiziert. Eine separate Passwortverwaltung ist nicht erforderlich.",
+            "Dein Account ist fest über Discord OAuth2 verifiziert.",
+          admin_unlinked_desc:
+            "Du bist über deinen bestehenden Admin-Account angemeldet. Du kannst dich jederzeit per Passwort anmelden oder optional deinen Discord-Account verknüpfen.",
           btn_logout: "🚪 Abmelden",
           lbl_personal_key: "DEIN PERSÖNLICHER DLSS-DB API KEY",
           btn_show_hide: "👁️ Zeigen/Verbergen",
@@ -979,9 +1025,18 @@
           discord_perk_3: "🔒 No separate password required",
           discord_setup_summary:
             "⚙️ Admin Note: Set up Discord OAuth2 in Cloudflare (1 minute)",
-          discord_linked_title: "🎮 Linked Discord Account",
+          admin_pw_login_summary:
+            "🛡️ Existing Admin Sign-In (Username & Password)",
+          admin_pw_login_hint:
+            "For pre-existing administrator accounts (e.g. #1 gOOvER) without re-registering via Discord:",
+          lbl_user_or_mail: "Username or Email",
+          lbl_password: "Password",
+          btn_login: "🔐 Sign In as Admin",
+          discord_linked_title: "🎮 Discord & Account Security",
           discord_linked_desc:
-            "Your account is verified via Discord OAuth2. No separate password is required.",
+            "Your account is verified via Discord OAuth2.",
+          admin_unlinked_desc:
+            "You are signed in with your existing Admin account. You can always sign in with your password or optionally link your Discord account.",
           btn_logout: "🚪 Sign Out",
           lbl_personal_key: "YOUR PERSONAL DLSS-DB API KEY",
           btn_show_hide: "👁️ Show/Hide",
@@ -1407,12 +1462,32 @@
         }
 
         const linkedInfoEl = document.getElementById("discord-linked-info");
+        const dBadge = document.getElementById("user-discord-badge");
+        const linkBox = document.getElementById("admin-link-discord-box");
+        const linkBtn = document.getElementById("btn-link-existing-discord");
+        const pwBox = document.getElementById("admin-pw-change-box");
+
+        if (dBadge) {
+          dBadge.textContent = currentUser.discord_id ? "Discord Verified" : "Legacy Admin Account";
+        }
+        if (linkBox && linkBtn) {
+          if (!currentUser.discord_id && authToken) {
+            linkBox.style.display = "block";
+            linkBtn.href = `/api/auth/discord?link_token=${encodeURIComponent(authToken)}`;
+          } else {
+            linkBox.style.display = "none";
+          }
+        }
+        if (pwBox) {
+          pwBox.style.display = currentUser.role === "admin" ? "block" : "none";
+        }
+
         if (linkedInfoEl) {
           linkedInfoEl.innerHTML = currentUser.discord_id
             ? `${t("discord_linked_desc")}<div style="margin-top:8px;font-family:Consolas,monospace;font-size:0.8rem;color:#c7d2fe">Discord ID: <strong>${esc(
                 currentUser.discord_id
               )}</strong> · Tag: <strong>${esc(currentUser.username)}</strong></div>`
-            : t("discord_linked_desc");
+            : t("admin_unlinked_desc");
         }
 
         const keyEl = document.getElementById("user-api-key-display");
