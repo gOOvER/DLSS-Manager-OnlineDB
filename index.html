@@ -30,7 +30,7 @@
         padding: 24px 20px 64px;
       }
       .container {
-        max-width: 1280px;
+        max-width: 1440px;
         margin: 0 auto;
       }
       header {
@@ -641,13 +641,11 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width:60px">ID</th>
-                  <th style="min-width:190px" data-i18n="th_user_mail">Benutzername / E-Mail</th>
-                  <th style="width:100px" data-i18n="th_role">Rolle</th>
-                  <th style="width:110px" data-i18n="th_status">Status</th>
-                  <th style="min-width:260px" data-i18n="th_apikey">Persönlicher API Key</th>
-                  <th style="min-width:150px" data-i18n="th_syncs">Abrufe / Letzter Sync</th>
-                  <th style="text-align:right" data-i18n="th_actions">Aktionen</th>
+                  <th style="min-width:180px" data-i18n="th_user_mail">Nutzer / E-Mail</th>
+                  <th style="min-width:150px" data-i18n="th_role">Rolle &amp; Status</th>
+                  <th style="min-width:210px" data-i18n="th_apikey">Persönlicher API Key</th>
+                  <th style="min-width:140px" data-i18n="th_syncs">Abrufe / Letzter Sync</th>
+                  <th style="text-align:right;min-width:290px" data-i18n="th_actions">Aktionen</th>
                 </tr>
               </thead>
               <tbody id="admin-users-tbody"></tbody>
@@ -868,10 +866,10 @@
             "Verwalte alle Nutzerkonten, Rollen (User / Admin), Sperrungen und persönliche API Keys.",
           btn_refresh: "🔄 Aktualisieren",
           btn_create_user: "➕ Nutzer anlegen",
-          th_user_mail: "Benutzername / E-Mail",
-          th_role: "Rolle",
+          th_user_mail: "Nutzer / E-Mail",
+          th_role: "Rolle & Status",
           th_status: "Status",
-          th_apikey: "Persönlicher API Key",
+          th_apikey: "Persönlicher API Key (Klick = Kopieren)",
           th_syncs: "Abrufe / Letzter Sync",
           th_actions: "Aktionen",
           adm_games_title: "🎮 Spiele-Datenbank verwalten (CRUD)",
@@ -974,10 +972,10 @@
             "Manage all user accounts, roles (User / Admin), suspensions, and personal API keys.",
           btn_refresh: "🔄 Refresh",
           btn_create_user: "➕ Create User",
-          th_user_mail: "Username / Email",
-          th_role: "Role",
+          th_user_mail: "User / Email",
+          th_role: "Role & Status",
           th_status: "Status",
-          th_apikey: "Personal API Key",
+          th_apikey: "Personal API Key (Click = Copy)",
           th_syncs: "Requests / Last Sync",
           th_actions: "Actions",
           adm_games_title: "🎮 Manage Game Database (CRUD)",
@@ -1492,55 +1490,79 @@
         }
       }
 
+      function copyAdminUserKey(key) {
+        if (!key) return;
+        navigator.clipboard.writeText(key);
+        showToast(`📋 API Key copied: ${key.slice(0, 16)}...`);
+      }
+
       function renderAdminUsersTable() {
         const tbody = document.getElementById("admin-users-tbody");
         tbody.innerHTML = adminUsersList
-          .map(
-            (u) => `
+          .map((u) => {
+            const shortKey = u.api_key
+              ? `${u.api_key.slice(0, 18)}…${u.api_key.slice(-8)}`
+              : null;
+            return `
           <tr>
-            <td>#${u.id}</td>
             <td>
-              <strong>${esc(u.username)}</strong>
-              <div style="color:var(--muted);font-size:0.75rem">${esc(u.email)}</div>
+              <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+                <span style="color:var(--muted);font-family:Consolas,monospace;font-size:0.78rem">#${u.id}</span>
+                <strong>${esc(u.username)}</strong>
+              </div>
+              <div style="color:var(--muted);font-size:0.75rem;margin-top:2px">${esc(u.email)}</div>
             </td>
-            <td>
-              <span class="badge ${u.role === "admin" ? "" : "badge-blue"}">${esc(u.role.toUpperCase())}</span>
+            <td style="white-space:nowrap">
+              <div style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                <span class="badge ${u.role === "admin" ? "" : "badge-blue"}">${esc(
+              u.role.toUpperCase()
+            )}</span>
+                ${
+                  Number(u.is_active) === 1
+                    ? `<span style="color:#a3e635;font-weight:600;font-size:0.8rem">${t(
+                        "status_active"
+                      )}</span>`
+                    : `<span style="color:#fca5a5;font-weight:600;font-size:0.8rem">${t(
+                        "status_suspended"
+                      )}</span>`
+                }
+              </div>
             </td>
-            <td>
-              ${
-                Number(u.is_active) === 1
-                  ? `<span style="color:#a3e635;font-weight:600;white-space:nowrap">${t("status_active")}</span>`
-                  : `<span style="color:#fca5a5;font-weight:600;white-space:nowrap">${t("status_suspended")}</span>`
-              }
-            </td>
-            <td style="font-family:Consolas,monospace;font-size:0.78rem;white-space:nowrap">
+            <td style="white-space:nowrap">
               ${
                 u.api_key
-                  ? `<span style="color:#bef264">${esc(u.api_key)}</span>`
+                  ? `<button class="btn btn-sm" style="font-family:Consolas,monospace;color:#bef264;background:rgba(118,185,0,0.1);border-color:rgba(118,185,0,0.3)" title="${esc(
+                      u.api_key
+                    )}" onclick="copyAdminUserKey('${esc(u.api_key)}')">
+                      <span>${esc(shortKey)}</span>
+                      <span>📋</span>
+                    </button>`
                   : `<span style="color:var(--muted)">${t("no_key")}</span>`
               }
             </td>
             <td style="white-space:nowrap">
               <strong>${u.api_requests_count || 0}</strong> Syncs
               <div style="color:var(--muted);font-size:0.74rem">${
-                u.last_api_access ? new Date(u.last_api_access).toLocaleString() : t("never_synced")
+                u.last_api_access
+                  ? new Date(u.last_api_access).toLocaleString()
+                  : t("never_synced")
               }</div>
             </td>
-            <td style="text-align:right">
-              <div style="display:inline-flex;gap:6px;flex-wrap:nowrap;align-items:center;justify-content:flex-end">
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'regenerate_key')">🔄 Key</button>
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'revoke_key')">🚫 Key</button>
+            <td style="text-align:right;white-space:nowrap">
+              <div style="display:inline-flex;gap:5px;flex-wrap:nowrap;align-items:center;justify-content:flex-end">
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'regenerate_key')" title="Neuen API Key generieren">🔄 Key</button>
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'revoke_key')" title="API Key widerrufen">🚫 Key</button>
                 <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'set_role', '${
               u.role === "admin" ? "user" : "admin"
             }')">${u.role === "admin" ? "⬇️ User" : "⬆️ Admin"}</button>
                 <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'toggle_active')">${
               Number(u.is_active) === 1 ? t("btn_suspend") : t("btn_activate")
             }</button>
-                <button class="btn btn-sm btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')">🗑️</button>
+                <button class="btn btn-sm btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')" title="Nutzer löschen">🗑️</button>
               </div>
             </td>
-          </tr>`
-          )
+          </tr>`;
+          })
           .join("");
       }
 
