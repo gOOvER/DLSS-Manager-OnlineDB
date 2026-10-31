@@ -1,0 +1,35 @@
+name: Validate Game Database JSON
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate api/v1/games.json integrity & unique IDs
+        run: |
+          python3 -c '
+          import json, sys
+          with open("api/v1/games.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          assert isinstance(data.get("schema_version"), int), "Missing schema_version"
+          games = data.get("games", [])
+          assert len(games) > 0, "games array cannot be empty"
+          seen_ids = set()
+          valid_ac = {"safe", "signed_only", "driver_override_only", "blocked"}
+          for g in games:
+              gid = g["id"]
+              assert gid not in seen_ids, f"Duplicate game id: {gid}"
+              seen_ids.add(gid)
+              assert g.get("title"), f"Missing title for {gid}"
+              assert g.get("anticheat_status") in valid_ac, f"Invalid anticheat_status for {gid}"
+          print(f"Successfully validated {len(games)} game profiles!")
+          '
+

@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DLSS Manager Game Compatibility & Settings Database",
+  "type": "object",
+  "required": ["schema_version", "updated_at", "games"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "steam_app_ids",
+          "match_names",
+          "match_executables",
+          "anticheat_status",
+          "supported_techs",
+          "unsupported_techs",
+          "recommended_settings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "steam_app_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "match_names": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "match_executables": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "anticheat_status": {
+            "type": "string",
+            "enum": ["safe", "signed_only", "driver_override_only", "blocked"]
+          },
+          "supported_techs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "unsupported_techs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tech", "reason"],
+              "properties": {
+                "tech": { "type": "string" },
+                "reason": { "type": "string" }
+              }
+            }
+          },
+          "warning_banner": {
+            "type": ["string", "null"]
+          },
+          "recommended_sr_preset": {
+            "type": ["string", "null"]
+          },
+          "recommended_rr_preset": {
+            "type": ["string", "null"]
+          },
+          "recommended_fg_preset": {
+            "type": ["string", "null"]
+          },
+          "recommended_settings": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
+

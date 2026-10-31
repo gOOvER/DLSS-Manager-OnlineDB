@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dlssdb.goover.dev — DLSS Manager Online Database, API Keys &amp; Admin</title>
+    <style>
+      :root {
+        --bg: #0b0e14;
+        --panel: #131822;
+        --panel-alt: #18202c;
+        --border: rgba(255, 255, 255, 0.08);
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #76b900;
+        --blue: #38bdf8;
+        --amber: #f59e0b;
+        --red: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.5;
+        padding: 24px 20px 64px;
+      }
+      .container {
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 22px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .badge {
+        font-size: 0.74rem;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba(118, 185, 0, 0.16);
+        color: #a3e635;
+        border: 1px solid rgba(118, 185, 0, 0.35);
+        font-weight: 700;
+      }
+      .badge-blue {
+        background: rgba(56, 189, 248, 0.16);
+        color: #7dd3fc;
+        border-color: rgba(56, 189, 248, 0.35);
+      }
+      .nav-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        background: var(--panel);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 8px 15px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-size: 0.86rem;
+        font-weight: 600;
+        transition: 0.15s;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+        background: var(--panel-alt);
+      }
+      .tab-btn.active {
+        background: rgba(118, 185, 0, 0.16);
+        color: #bef264;
+        border-color: rgba(118, 185, 0, 0.45);
+      }
+      .view-pane {
+        display: none;
+      }
+      .view-pane.active {
+        display: block;
+      }
+      .btn {
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 7px 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.15s;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.13);
+      }
+      .btn-primary {
+        background: rgba(118, 185, 0, 0.22);
+        color: #d9f99d;
+        border-color: rgba(118, 185, 0, 0.5);
+      }
+      .btn-primary:hover {
+        background: rgba(118, 185, 0, 0.34);
+      }
+      .btn-danger {
+        background: rgba(239, 68, 68, 0.16);
+        color: #fca5a5;
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+      .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.28);
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 18px;
+      }
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        background: #0e131b;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 0.88rem;
+        font-family: inherit;
+      }
+      .textarea {
+        min-height: 76px;
+        resize: vertical;
+      }
+      .form-group {
+        margin-bottom: 12px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 18px;
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .stat-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .stat-label {
+        font-size: 0.76rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .stat-val {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: var(--text);
+        margin-top: 4px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .card-title {
+        font-size: 1.06rem;
+        font-weight: 700;
+      }
+      .card-id {
+        font-size: 0.74rem;
+        color: var(--muted);
+        font-family: Consolas, monospace;
+      }
+      .ac-pill {
+        font-size: 0.72rem;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .ac-safe {
+        background: rgba(118, 185, 0, 0.15);
+        color: #a3e635;
+        border: 1px solid rgba(118, 185, 0, 0.35);
+      }
+      .ac-signed_only {
+        background: rgba(56, 189, 248, 0.15);
+        color: #7dd3fc;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+      }
+      .ac-driver_override_only {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+      }
+      .ac-blocked {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+      }
+      .tech-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tech-chip {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: rgba(118, 185, 0, 0.14);
+        color: #bef264;
+        border: 1px solid rgba(118, 185, 0, 0.28);
+        font-weight: 600;
+      }
+      .preset-chip {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: rgba(56, 189, 248, 0.14);
+        color: #7dd3fc;
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        font-weight: 600;
+      }
+      .warn-box {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.28);
+        color: #fde68a;
+      }
+      .unsupported-box {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .settings-list {
+        font-size: 0.8rem;
+        color: #cbd5e1;
+        padding-left: 16px;
+      }
+      .api-key-box {
+        background: #090c11;
+        border: 1px solid rgba(118, 185, 0, 0.35);
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-family: Consolas, monospace;
+        font-size: 0.92rem;
+        color: #bef264;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.83rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+      .toast {
+        position: fixed;
+        bottom: 22px;
+        right: 22px;
+        background: #161d2a;
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--accent);
+        color: var(--text);
+        padding: 12px 16px;
+        border-radius: 9px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        font-size: 0.85rem;
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 1000;
+      }
+      .modal-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        width: 100%;
+        max-width: 680px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div>
+          <h1>
+            <span>☁️ dlssdb.goover.dev</span>
+            <span class="badge" id="profile-count-badge">16 Profiles</span>
+            <span class="badge badge-blue" id="backend-mode-badge">Cloudflare Free Tier</span>
+          </h1>
+          <p style="color: var(--muted); font-size: 0.86rem; margin-top: 4px">
+            DLSS Manager Online Game Compatibility Database · Personal API Key Portal &amp; Admin Control Center
+          </p>
+        </div>
+
+        <nav class="nav-tabs">
+          <button class="tab-btn active" onclick="switchTab('games')" id="tab-btn-games">
+            🎮 Game Database
+          </button>
+          <button class="tab-btn" onclick="switchTab('account')" id="tab-btn-account">
+            🔑 My API Key / Account
+          </button>
+          <button class="tab-btn" onclick="switchTab('admin')" id="tab-btn-admin" style="display: none">
+            🛡️ Admin Bereich
+          </button>
+        </nav>
+      </header>
+
+      <!-- TAB 1: PUBLIC GAME DATABASE EXPLORER -->
+      <section class="view-pane active" id="pane-games">
+        <div class="panel" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 18px">
+          <div>
+            <strong>API Endpoint für DLSS Manager:</strong>
+            <code style="color:var(--blue);margin-left:8px;font-family:Consolas,monospace">https://dlssdb.goover.dev/api/v1/games.json</code>
+            <span style="color:var(--muted);font-size:0.8rem;margin-left:8px">(Erfordert deinen persönlichen API Key im Header <code>X-API-Key</code>)</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="switchTab('account')">🔑 Eigenen API Key erstellen</button>
+            <a class="btn" href="https://github.com/gOOvER/DLSS-Manager" target="_blank">DLSS Manager GitHub ↗</a>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input
+            type="text"
+            id="search"
+            class="input"
+            style="flex:1;min-width:240px"
+            placeholder="Search game title, Steam AppID, executable, or technology..."
+          />
+          <select id="ac-filter" class="select" style="width:auto;min-width:220px">
+            <option value="all">All Anti-Cheat Policies</option>
+            <option value="safe">✅ Safe (Full Swap)</option>
+            <option value="signed_only">🛡️ Signed DLLs Only</option>
+            <option value="driver_override_only">🎛️ Driver Override Only</option>
+            <option value="blocked">⛔ Blocked</option>
+          </select>
+        </div>
+
+        <div class="grid" id="games-grid"></div>
+      </section>
+
+      <!-- TAB 2: USER ACCOUNT & PERSONAL API KEY -->
+      <section class="view-pane" id="pane-account">
+        <!-- Unauthenticated Login / Register View -->
+        <div id="auth-guest-view" class="two-col">
+          <div class="panel">
+            <h3 style="margin-bottom:6px">🔐 Login</h3>
+            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px">
+              Melde dich an, um deinen persönlichen API Key für <strong>DLSS Manager</strong> einzusehen oder neu zu generieren.
+            </p>
+            <div class="form-group">
+              <label>Username oder E-Mail</label>
+              <input type="text" id="login-username" class="input" placeholder="Username oder E-Mail" />
+            </div>
+            <div class="form-group">
+              <label>Passwort</label>
+              <input type="password" id="login-password" class="input" placeholder="••••••••" />
+            </div>
+            <button class="btn btn-primary" onclick="handleLogin()" style="width:100%;justify-content:center;margin-top:4px">
+              Anmelden
+            </button>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-bottom:6px">✨ Account &amp; eigenen API Key erstellen</h3>
+            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px">
+              Jeder Nutzer erhält sofort einen eigenen API Key (<code>dlss_live_...</code>). <em>Hinweis: Der allererste registrierte Account wird automatisch als <strong>Admin</strong> eingerichtet!</em>
+            </p>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="reg-username" class="input" placeholder="z.B. goover" />
+            </div>
+            <div class="form-group">
+              <label>E-Mail Adresse</label>
+              <input type="email" id="reg-email" class="input" placeholder="name@example.com" />
+            </div>
+            <div class="form-group">
+              <label>Passwort (mind. 6 Zeichen)</label>
+              <input type="password" id="reg-password" class="input" placeholder="••••••••" />
+            </div>
+            <button class="btn btn-primary" onclick="handleRegister()" style="width:100%;justify-content:center;margin-top:4px">
+              Registrieren &amp; API Key generieren
+            </button>
+          </div>
+        </div>
+
+        <!-- Authenticated User Dashboard -->
+        <div id="auth-user-view" style="display:none">
+          <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+              <div>
+                <h3 style="display:flex;align-items:center;gap:10px">
+                  <span id="user-greeting">Willkommen!</span>
+                  <span class="badge" id="user-role-badge">USER</span>
+                </h3>
+                <p style="color:var(--muted);font-size:0.82rem" id="user-email-line"></p>
+              </div>
+              <button class="btn btn-danger" onclick="handleLogout()">🚪 Abmelden</button>
+            </div>
+
+            <div style="margin-bottom:16px">
+              <label style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">
+                DEIN PERSÖNLICHER DLSS-DB API KEY
+              </label>
+              <div class="api-key-box">
+                <span id="user-api-key-display">dlss_live_••••••••••••••••••••••••</span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="btn" onclick="toggleRevealMyKey()">👁️ Zeigen/Verbergen</button>
+                  <button class="btn btn-primary" onclick="copyMyApiKey()">📋 API Key kopieren</button>
+                  <button class="btn" onclick="regenerateMyApiKey()">🔄 Neuen Key generieren</button>
+                  <button class="btn btn-danger" onclick="revokeMyApiKey()">🚫 Key widerrufen</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-row" style="margin-top:16px;margin-bottom:0">
+              <div class="stat-box">
+                <div class="stat-label">API Sync-Abrufe</div>
+                <div class="stat-val" id="user-stat-requests">0</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Letzter Abruf</div>
+                <div class="stat-val" style="font-size:1rem;margin-top:10px" id="user-stat-last-access">Noch nie</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Key erstellt am</div>
+                <div class="stat-val" style="font-size:1rem;margin-top:10px" id="user-stat-key-date">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="panel">
+              <h3 style="margin-bottom:8px">🚀 Einrichtung in DLSS Manager</h3>
+              <ol style="padding-left:18px;color:#cbd5e1;font-size:0.85rem;line-height:1.7">
+                <li>Öffne <strong>DLSS Manager</strong> und wechsle links auf <strong>⚙️ Settings</strong>.</li>
+                <li>Scrolle zur Karte <strong>☁️ Game Compatibility &amp; Settings Database (<code>dlssdb.goover.dev</code>)</strong>.</li>
+                <li>Füge deinen persönlichen <strong>API Key</strong> (<code>dlss_live_...</code>) ein.</li>
+                <li>Klicke auf <strong>🔄 Save Key &amp; Sync Database</strong>.</li>
+              </ol>
+            </div>
+
+            <div class="panel">
+              <h3 style="margin-bottom:8px">🔒 Passwort ändern</h3>
+              <div class="form-group">
+                <label>Neues Passwort (mind. 6 Zeichen)</label>
+                <input type="password" id="new-password-input" class="input" placeholder="Neues Passwort..." />
+              </div>
+              <button class="btn btn-primary" onclick="handleChangePassword()">💾 Passwort aktualisieren</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ADMIN CONTROL CENTER -->
+      <section class="view-pane" id="pane-admin">
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Registrierte Nutzer</div>
+            <div class="stat-val" id="adm-stat-users">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Aktive API Keys</div>
+            <div class="stat-val" id="adm-stat-keys">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Gesamte API Syncs</div>
+            <div class="stat-val" id="adm-stat-requests">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Spiele-Profile in DB</div>
+            <div class="stat-val" id="adm-stat-games">0</div>
+          </div>
+        </div>
+
+        <!-- Admin User Management -->
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+            <div>
+              <h3>👥 Benutzerverwaltung &amp; API Keys</h3>
+              <p style="color:var(--muted);font-size:0.82rem">
+                Verwalte alle Nutzerkonten, Rollen (User / Admin), Sperrungen und persönliche API Keys.
+              </p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" onclick="loadAdminDashboard()">🔄 Aktualisieren</button>
+              <button class="btn btn-primary" onclick="openCreateUserModal()">➕ Nutzer anlegen</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username / E-Mail</th>
+                  <th>Rolle</th>
+                  <th>Status</th>
+                  <th>Persönlicher API Key</th>
+                  <th>Abrufe / Letzter Sync</th>
+                  <th>Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Game Compatibility Database Management -->
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+            <div>
+              <h3>🎮 Spiele-Datenbank verwalten (CRUD)</h3>
+              <p style="color:var(--muted);font-size:0.82rem">
+                Füge neue Spieleprofile hinzu oder bearbeite Anti-Cheat-Einstufungen und empfohlene DLSS 4.5 Presets.
+              </p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" onclick="exportGamesJsonFile()">📥 Export games.json</button>
+              <button class="btn btn-primary" onclick="openGameEditorModal(null)">➕ Neues Spiel hinzufügen</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Titel</th>
+                  <th>Anti-Cheat</th>
+                  <th>Unterstützte Techs</th>
+                  <th>Empfohlene Presets</th>
+                  <th>Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="admin-games-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Modal: Admin Create User -->
+    <div class="modal-backdrop" id="modal-create-user">
+      <div class="modal-box" style="max-width:460px">
+        <h3 style="margin-bottom:12px">➕ Neuen Benutzer anlegen</h3>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="adm-new-username" class="input" placeholder="Username" />
+        </div>
+        <div class="form-group">
+          <label>E-Mail</label>
+          <input type="email" id="adm-new-email" class="input" placeholder="user@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Start-Passwort (mind. 6 Zeichen)</label>
+          <input type="password" id="adm-new-password" class="input" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label>Rolle</label>
+          <select id="adm-new-role" class="select">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+          <button class="btn" onclick="closeModals()">Abbrechen</button>
+          <button class="btn btn-primary" onclick="submitAdminCreateUser()">✓ Benutzer &amp; API Key erstellen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Admin Add/Edit Game Profile -->
+    <div class="modal-backdrop" id="modal-edit-game">
+      <div class="modal-box">
+        <h3 style="margin-bottom:12px" id="game-modal-title">🎮 Spiel-Profil bearbeiten</h3>
+        <div class="two-col" style="gap:12px">
+          <div class="form-group">
+            <label>Eindeutige ID (slug, z.B. <code>starcitizen</code>)</label>
+            <input type="text" id="gm-id" class="input" placeholder="z.B. cyberpunk-2077" />
+          </div>
+          <div class="form-group">
+            <label>Spieletitel</label>
+            <input type="text" id="gm-title" class="input" placeholder="z.B. Cyberpunk 2077" />
+          </div>
+        </div>
+        <div class="two-col" style="gap:12px">
+          <div class="form-group">
+            <label>Steam App IDs (Komma-getrennt)</label>
+            <input type="text" id="gm-appids" class="input" placeholder="z.B. 1091500" />
+          </div>
+          <div class="form-group">
+            <label>Executables (Komma-getrennt)</label>
+            <input type="text" id="gm-exes" class="input" placeholder="z.B. cyberpunk2077.exe" />
+          </div>
+        </div>
+        <div class="two-col" style="gap:12px">
+          <div class="form-group">
+            <label>Anti-Cheat Status</label>
+            <select id="gm-ac" class="select">
+              <option value="safe">✅ safe (Voller DLL-Tausch erlaubt)</option>
+              <option value="signed_only">🛡️ signed_only (Nur offiziell signierte DLLs)</option>
+              <option value="driver_override_only">🎛️ driver_override_only (Nur NVIDIA Treiber-Presets)</option>
+              <option value="blocked">⛔ blocked (Updates gesperrt)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Unterstützte Technologien (Komma-getrennt)</label>
+            <input type="text" id="gm-techs" class="input" placeholder="DLSS, DLSS-G, DLSS-RR, Streamline, FSR 3/4, XeSS" />
+          </div>
+        </div>
+        <div class="two-col" style="gap:12px">
+          <div class="form-group">
+            <label>Empfohlenes DLSS SR Preset</label>
+            <input type="text" id="gm-sr" class="input" placeholder="Preset K" />
+          </div>
+          <div class="form-group">
+            <label>Empfohlenes DLSS RR / FG Preset (Format: <code>Preset F | Latest</code>)</label>
+            <input type="text" id="gm-rr-fg" class="input" placeholder="Preset F | Latest" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Warnhinweis-Banner (optional)</label>
+          <input type="text" id="gm-warn" class="input" placeholder="Optionaler Anti-Cheat oder Launcher Hinweis..." />
+        </div>
+        <div class="form-group">
+          <label>Nicht unterstützte Technologien (Eine pro Zeile im Format <code>Tech: Grund</code>)</label>
+          <textarea id="gm-unsupported" class="textarea" placeholder="FSR 3/4 & TSR: Direkt in StarCitizen.exe und Data.p4k kompiliert"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Empfohlene In-Game Einstellungen (Eine pro Zeile)</label>
+          <textarea id="gm-settings" class="textarea" placeholder="Upscaling: DLSS Quality (Preset K)"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+          <button class="btn" onclick="closeModals()">Abbrechen</button>
+          <button class="btn btn-primary" onclick="submitGameProfile()">💾 Profil speichern</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let allGames = [];
+      let authToken = localStorage.getItem("dlssdb_token") || null;
+      let currentUser = null;
+      let revealMyKey = false;
+      let adminUsersList = [];
+
+      const acLabels = {
+        safe: "✅ Safe",
+        signed_only: "🛡️ Signed DLLs Only",
+        driver_override_only: "🎛️ Driver Override Only",
+        blocked: "⛔ Blocked",
+      };
+
+      function showToast(msg, isError = false) {
+        const t = document.createElement("div");
+        t.className = "toast";
+        if (isError) t.style.borderLeftColor = "#ef4444";
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+      }
+
+      function esc(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function switchTab(tab) {
+        for (const id of ["games", "account", "admin"]) {
+          document.getElementById(`pane-${id}`).classList.toggle("active", id === tab);
+          document.getElementById(`tab-btn-${id}`).classList.toggle("active", id === tab);
+        }
+        if (tab === "admin" && currentUser?.role === "admin") {
+          loadAdminDashboard();
+        }
+      }
+
+      // Local fallback storage if previewed statically without Cloudflare Pages Functions
+      function getLocalFallbackState() {
+        const raw = localStorage.getItem("dlssdb_local_state");
+        if (raw) {
+          try {
+            return JSON.parse(raw);
+          } catch {}
+        }
+        return { users: [], games: allGames };
+      }
+      function saveLocalFallbackState(st) {
+        localStorage.setItem("dlssdb_local_state", JSON.stringify(st));
+      }
+      function genRandomKey() {
+        const arr = new Uint8Array(20);
+        crypto.getRandomValues(arr);
+        return (
+          "dlss_live_" +
+          Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("")
+        );
+      }
+
+      async function apiRequest(path, method = "GET", body = null) {
+        const headers = { "Content-Type": "application/json" };
+        if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+        try {
+          const res = await fetch(path, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : null,
+          });
+          const ct = res.headers.get("content-type") || "";
+          if (res.status === 404 || res.status === 405 || !ct.includes("application/json")) {
+            throw new Error("LOCAL_FALLBACK");
+          }
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || `HTTP ${res.status}`);
+          }
+          document.getElementById("backend-mode-badge").textContent = "Cloudflare D1 Edge SQLite";
+          return data;
+        } catch (err) {
+          if (err.message === "LOCAL_FALLBACK" || err.name === "TypeError") {
+            document.getElementById("backend-mode-badge").textContent = "Local Preview Mode";
+            return handleLocalFallbackApi(path, method, body);
+          }
+          throw err;
+        }
+      }
+
+      // Seamless client-side fallback when testing via static file server before deploying to Cloudflare Pages
+      function handleLocalFallbackApi(path, method, body) {
+        const st = getLocalFallbackState();
+        const now = new Date().toISOString();
+
+        if (path === "/api/auth/register" && method === "POST") {
+          const { username, email, password } = body;
+          if (!username || username.length < 3) throw new Error("Username mind. 3 Zeichen.");
+          if (!email || !email.includes("@")) throw new Error("Gültige E-Mail erforderlich.");
+          if (!password || password.length < 6) throw new Error("Passwort mind. 6 Zeichen.");
+          if (st.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
+            throw new Error("Username bereits vergeben.");
+          }
+          const user = {
+            id: st.users.length + 1,
+            username,
+            email,
+            password,
+            role: st.users.length === 0 ? "admin" : "user",
+            api_key: genRandomKey(),
+            api_key_created_at: now,
+            api_requests_count: 0,
+            last_api_access: null,
+            is_active: 1,
+            created_at: now,
+          };
+          st.users.push(user);
+          saveLocalFallbackState(st);
+          return { token: `local_${user.id}`, user };
+        }
+
+        if (path === "/api/auth/login" && method === "POST") {
+          const login = (body.username || "").toLowerCase();
+          const u = st.users.find(
+            (x) =>
+              (x.username.toLowerCase() === login || x.email.toLowerCase() === login) &&
+              x.password === body.password
+          );
+          if (!u) throw new Error("Ungültige Zugangsdaten.");
+          if (!u.is_active) throw new Error("Account ist gesperrt.");
+          return { token: `local_${u.id}`, user: u };
+        }
+
+        const uid = authToken?.startsWith("local_") ? Number(authToken.slice(6)) : null;
+        const me = st.users.find((x) => x.id === uid);
+
+        if (path === "/api/auth/me") {
+          if (!me) throw new Error("Nicht angemeldet");
+          if (method === "GET") return { user: me };
+          if (body.action === "generate_key") {
+            me.api_key = genRandomKey();
+            me.api_key_created_at = now;
+            saveLocalFallbackState(st);
+            return { message: "Neuer API Key generiert!", user: me };
+          }
+          if (body.action === "revoke_key") {
+            me.api_key = null;
+            me.api_key_created_at = null;
+            saveLocalFallbackState(st);
+            return { message: "API Key widerrufen.", user: me };
+          }
+          if (body.action === "change_password") {
+            me.password = body.new_password;
+            saveLocalFallbackState(st);
+            return { message: "Passwort geändert." };
+          }
+          if (body.action === "logout") return { message: "Abgemeldet." };
+        }
+
+        if (path === "/api/admin/users") {
+          if (!me || me.role !== "admin") throw new Error("Admin-Rechte erforderlich.");
+          if (method === "GET") {
+            return {
+              stats: {
+                total_users: st.users.length,
+                active_keys: st.users.filter((u) => u.api_key && u.is_active).length,
+                total_api_requests: st.users.reduce((s, u) => s + (u.api_requests_count || 0), 0),
+                total_games: allGames.length,
+              },
+              users: st.users,
+            };
+          }
+          if (body.action === "create_user") {
+            const nu = {
+              id: (st.users.at(-1)?.id || 0) + 1,
+              username: body.username,
+              email: body.email,
+              password: body.password,
+              role: body.role || "user",
+              api_key: genRandomKey(),
+              api_key_created_at: now,
+              api_requests_count: 0,
+              last_api_access: null,
+              is_active: 1,
+              created_at: now,
+            };
+            st.users.push(nu);
+            saveLocalFallbackState(st);
+            return { message: "Benutzer erstellt." };
+          }
+          const target = st.users.find((u) => u.id === Number(body.user_id));
+          if (!target) throw new Error("Benutzer nicht gefunden");
+          if (body.action === "toggle_active") target.is_active = target.is_active ? 0 : 1;
+          if (body.action === "set_role") target.role = body.role;
+          if (body.action === "regenerate_key") {
+            target.api_key = genRandomKey();
+            target.api_key_created_at = now;
+          }
+          if (body.action === "revoke_key") target.api_key = null;
+          if (body.action === "delete_user") {
+            st.users = st.users.filter((u) => u.id !== target.id);
+          }
+          saveLocalFallbackState(st);
+          return { message: "Aktion ausgeführt." };
+        }
+
+        if (path === "/api/admin/games") {
+          if (!me || me.role !== "admin") throw new Error("Admin-Rechte erforderlich.");
+          if (method === "GET") return { games: allGames };
+          if (body.action === "delete") {
+            allGames = allGames.filter((g) => g.id !== body.id);
+            st.games = allGames;
+            saveLocalFallbackState(st);
+            return { message: "Spiel gelöscht." };
+          }
+          const g = body.game;
+          const idx = allGames.findIndex((x) => x.id === g.id);
+          if (idx >= 0) allGames[idx] = g;
+          else allGames.push(g);
+          st.games = allGames;
+          saveLocalFallbackState(st);
+          return { message: "Spiel gespeichert.", game: g };
+        }
+
+        throw new Error("Unbekannter Endpunkt");
+      }
+
+      function renderGames() {
+        const q = document.getElementById("search").value.toLowerCase().trim();
+        const ac = document.getElementById("ac-filter").value;
+        const filtered = allGames.filter((g) => {
+          if (ac !== "all" && g.anticheat_status !== ac) return false;
+          if (!q) return true;
+          const hay = [
+            g.id,
+            g.title,
+            ...(g.steam_app_ids || []),
+            ...(g.match_executables || []),
+            ...(g.supported_techs || []),
+          ]
+            .join(" ")
+            .toLowerCase();
+          return hay.includes(q);
+        });
+
+        document.getElementById("profile-count-badge").textContent = `${allGames.length} Profiles`;
+
+        const grid = document.getElementById("games-grid");
+        grid.innerHTML = filtered
+          .map(
+            (g) => `
+          <div class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">${esc(g.title)}</div>
+                <div class="card-id">${esc(g.id)} · ${(g.match_executables || []).map(esc).join(", ")}</div>
+              </div>
+              <span class="ac-pill ac-${esc(g.anticheat_status)}">${acLabels[g.anticheat_status] || esc(g.anticheat_status)}</span>
+            </div>
+
+            <div class="tech-chips">
+              ${(g.supported_techs || []).map((t) => `<span class="tech-chip">${esc(t)}</span>`).join("")}
+              ${g.recommended_sr_preset ? `<span class="preset-chip">SR: ${esc(g.recommended_sr_preset)}</span>` : ""}
+              ${g.recommended_rr_preset ? `<span class="preset-chip">RR: ${esc(g.recommended_rr_preset)}</span>` : ""}
+              ${g.recommended_fg_preset ? `<span class="preset-chip">FG: ${esc(g.recommended_fg_preset)}</span>` : ""}
+            </div>
+
+            ${g.warning_banner ? `<div class="warn-box">⚠️ ${esc(g.warning_banner)}</div>` : ""}
+
+            ${
+              (g.unsupported_techs || []).length > 0
+                ? `<div class="unsupported-box">
+                    ${g.unsupported_techs
+                      .map((u) => `<div>• <strong>${esc(u.tech)}:</strong> ${esc(u.reason)}</div>`)
+                      .join("")}
+                   </div>`
+                : ""
+            }
+
+            ${
+              (g.recommended_settings || []).length > 0
+                ? `<ul class="settings-list">
+                    ${g.recommended_settings.map((s) => `<li>${esc(s)}</li>`).join("")}
+                   </ul>`
+                : ""
+            }
+          </div>`
+          )
+          .join("");
+      }
+
+      function renderUserUI() {
+        const guestEl = document.getElementById("auth-guest-view");
+        const userEl = document.getElementById("auth-user-view");
+        const adminTabBtn = document.getElementById("tab-btn-admin");
+
+        if (!currentUser) {
+          guestEl.style.display = "grid";
+          userEl.style.display = "none";
+          adminTabBtn.style.display = "none";
+          return;
+        }
+
+        guestEl.style.display = "none";
+        userEl.style.display = "block";
+        adminTabBtn.style.display = currentUser.role === "admin" ? "inline-flex" : "none";
+
+        document.getElementById("user-greeting").textContent = `Hallo, ${currentUser.username}!`;
+        const rBadge = document.getElementById("user-role-badge");
+        rBadge.textContent = currentUser.role.toUpperCase();
+        rBadge.className = currentUser.role === "admin" ? "badge" : "badge badge-blue";
+        document.getElementById("user-email-line").textContent = `${currentUser.email} · Account erstellt am ${new Date(currentUser.created_at).toLocaleDateString()}`;
+
+        const keyEl = document.getElementById("user-api-key-display");
+        if (!currentUser.api_key) {
+          keyEl.textContent = "Kein aktiver API Key — bitte auf '🔄 Neuen Key generieren' klicken.";
+          keyEl.style.color = "#fca5a5";
+        } else {
+          keyEl.style.color = "#bef264";
+          keyEl.textContent = revealMyKey
+            ? currentUser.api_key
+            : currentUser.api_key.slice(0, 14) + "••••••••••••••••••••••••••";
+        }
+
+        document.getElementById("user-stat-requests").textContent =
+          currentUser.api_requests_count || 0;
+        document.getElementById("user-stat-last-access").textContent = currentUser.last_api_access
+          ? new Date(currentUser.last_api_access).toLocaleString()
+          : "Noch kein Sync";
+        document.getElementById("user-stat-key-date").textContent = currentUser.api_key_created_at
+          ? new Date(currentUser.api_key_created_at).toLocaleString()
+          : "—";
+      }
+
+      async function handleRegister() {
+        const username = document.getElementById("reg-username").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        try {
+          const res = await apiRequest("/api/auth/register", "POST", {
+            username,
+            email,
+            password,
+          });
+          authToken = res.token;
+          localStorage.setItem("dlssdb_token", authToken);
+          currentUser = res.user;
+          revealMyKey = true;
+          renderUserUI();
+          showToast(
+            `✓ Willkommen ${currentUser.username}! Dein persönlicher API Key wurde erstellt.`
+          );
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function handleLogin() {
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value;
+        try {
+          const res = await apiRequest("/api/auth/login", "POST", { username, password });
+          authToken = res.token;
+          localStorage.setItem("dlssdb_token", authToken);
+          currentUser = res.user;
+          renderUserUI();
+          showToast(`✓ Angemeldet als ${currentUser.username}`);
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function handleLogout() {
+        try {
+          await apiRequest("/api/auth/me", "POST", { action: "logout" });
+        } catch {}
+        authToken = null;
+        currentUser = null;
+        localStorage.removeItem("dlssdb_token");
+        renderUserUI();
+        switchTab("account");
+        showToast("Abgemeldet.");
+      }
+
+      function toggleRevealMyKey() {
+        revealMyKey = !revealMyKey;
+        renderUserUI();
+      }
+
+      function copyMyApiKey() {
+        if (!currentUser?.api_key) {
+          showToast("Bitte generiere zuerst einen API Key.", true);
+          return;
+        }
+        navigator.clipboard.writeText(currentUser.api_key);
+        showToast("📋 Persönlicher API Key in die Zwischenablage kopiert!");
+      }
+
+      async function regenerateMyApiKey() {
+        try {
+          const res = await apiRequest("/api/auth/me", "POST", { action: "generate_key" });
+          currentUser = res.user;
+          revealMyKey = true;
+          renderUserUI();
+          showToast("🔄 Neuer persönlicher API Key generiert!");
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function revokeMyApiKey() {
+        try {
+          const res = await apiRequest("/api/auth/me", "POST", { action: "revoke_key" });
+          currentUser = res.user;
+          renderUserUI();
+          showToast("🚫 API Key widerrufen.");
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function handleChangePassword() {
+        const new_password = document.getElementById("new-password-input").value;
+        try {
+          const res = await apiRequest("/api/auth/me", "POST", {
+            action: "change_password",
+            new_password,
+          });
+          document.getElementById("new-password-input").value = "";
+          showToast(res.message || "Passwort aktualisiert.");
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      // ADMIN FUNCTIONS
+      async function loadAdminDashboard() {
+        try {
+          const data = await apiRequest("/api/admin/users", "GET");
+          adminUsersList = data.users || [];
+          document.getElementById("adm-stat-users").textContent = data.stats?.total_users || 0;
+          document.getElementById("adm-stat-keys").textContent = data.stats?.active_keys || 0;
+          document.getElementById("adm-stat-requests").textContent =
+            data.stats?.total_api_requests || 0;
+          document.getElementById("adm-stat-games").textContent =
+            data.stats?.total_games || allGames.length;
+
+          renderAdminUsersTable();
+          renderAdminGamesTable();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function renderAdminUsersTable() {
+        const tbody = document.getElementById("admin-users-tbody");
+        tbody.innerHTML = adminUsersList
+          .map(
+            (u) => `
+          <tr>
+            <td>#${u.id}</td>
+            <td>
+              <strong>${esc(u.username)}</strong>
+              <div style="color:var(--muted);font-size:0.75rem">${esc(u.email)}</div>
+            </td>
+            <td>
+              <span class="badge ${u.role === "admin" ? "" : "badge-blue"}">${esc(u.role.toUpperCase())}</span>
+            </td>
+            <td>
+              ${
+                Number(u.is_active) === 1
+                  ? `<span style="color:#a3e635;font-weight:600">● Aktiv</span>`
+                  : `<span style="color:#fca5a5;font-weight:600">⛔ Gesperrt</span>`
+              }
+            </td>
+            <td style="font-family:Consolas,monospace;font-size:0.78rem">
+              ${
+                u.api_key
+                  ? `<span style="color:#bef264">${esc(u.api_key)}</span>`
+                  : `<span style="color:var(--muted)">Kein Key</span>`
+              }
+            </td>
+            <td>
+              <strong>${u.api_requests_count || 0}</strong> Syncs
+              <div style="color:var(--muted);font-size:0.74rem">${
+                u.last_api_access ? new Date(u.last_api_access).toLocaleString() : "Nie"
+              }</div>
+            </td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn" onclick="adminUserAction(${u.id}, 'regenerate_key')" title="Neuen API Key generieren">🔄 Key</button>
+                <button class="btn" onclick="adminUserAction(${u.id}, 'revoke_key')" title="API Key widerrufen">🚫 Key</button>
+                <button class="btn" onclick="adminUserAction(${u.id}, 'set_role', '${
+              u.role === "admin" ? "user" : "admin"
+            }')">${u.role === "admin" ? "⬇️ User" : "⬆️ Admin"}</button>
+                <button class="btn" onclick="adminUserAction(${u.id}, 'toggle_active')">${
+              Number(u.is_active) === 1 ? "⏸️ Sperren" : "▶️ Aktivieren"
+            }</button>
+                <button class="btn btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')">🗑️</button>
+              </div>
+            </td>
+          </tr>`
+          )
+          .join("");
+      }
+
+      async function adminUserAction(userId, action, role = null) {
+        try {
+          const res = await apiRequest("/api/admin/users", "POST", {
+            user_id: userId,
+            action,
+            role,
+          });
+          showToast(res.message || "Aktion ausgeführt.");
+          if (userId === currentUser?.id) {
+            const meRes = await apiRequest("/api/auth/me", "GET");
+            currentUser = meRes.user;
+            renderUserUI();
+          }
+          loadAdminDashboard();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function openCreateUserModal() {
+        document.getElementById("modal-create-user").style.display = "flex";
+      }
+
+      function closeModals() {
+        document.getElementById("modal-create-user").style.display = "none";
+        document.getElementById("modal-edit-game").style.display = "none";
+      }
+
+      async function submitAdminCreateUser() {
+        const username = document.getElementById("adm-new-username").value.trim();
+        const email = document.getElementById("adm-new-email").value.trim();
+        const password = document.getElementById("adm-new-password").value;
+        const role = document.getElementById("adm-new-role").value;
+        try {
+          const res = await apiRequest("/api/admin/users", "POST", {
+            action: "create_user",
+            username,
+            email,
+            password,
+            role,
+          });
+          closeModals();
+          showToast(res.message || "Benutzer angelegt!");
+          loadAdminDashboard();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function renderAdminGamesTable() {
+        const tbody = document.getElementById("admin-games-tbody");
+        tbody.innerHTML = allGames
+          .map(
+            (g) => `
+          <tr>
+            <td style="font-family:Consolas,monospace;font-size:0.78rem">${esc(g.id)}</td>
+            <td><strong>${esc(g.title)}</strong></td>
+            <td><span class="ac-pill ac-${esc(g.anticheat_status)}">${
+              acLabels[g.anticheat_status] || esc(g.anticheat_status)
+            }</span></td>
+            <td>${(g.supported_techs || []).map((t) => `<span class="tech-chip" style="margin-right:4px">${esc(t)}</span>`).join("")}</td>
+            <td>
+              ${g.recommended_sr_preset ? `<span class="preset-chip">SR: ${esc(g.recommended_sr_preset)}</span>` : "—"}
+            </td>
+            <td>
+              <div style="display:flex;gap:6px">
+                <button class="btn" onclick="openGameEditorModal('${esc(g.id)}')">✏️ Bearbeiten</button>
+                <button class="btn btn-danger" onclick="deleteGameProfile('${esc(g.id)}')">🗑️</button>
+              </div>
+            </td>
+          </tr>`
+          )
+          .join("");
+      }
+
+      function openGameEditorModal(gameId) {
+        const g = gameId ? allGames.find((x) => x.id === gameId) : null;
+        document.getElementById("game-modal-title").textContent = g
+          ? `✏️ ${g.title} bearbeiten`
+          : "➕ Neues Spiel-Profil anlegen";
+        document.getElementById("gm-id").value = g?.id || "";
+        document.getElementById("gm-title").value = g?.title || "";
+        document.getElementById("gm-appids").value = (g?.steam_app_ids || []).join(", ");
+        document.getElementById("gm-exes").value = (g?.match_executables || []).join(", ");
+        document.getElementById("gm-ac").value = g?.anticheat_status || "safe";
+        document.getElementById("gm-techs").value = (g?.supported_techs || ["DLSS"]).join(", ");
+        document.getElementById("gm-sr").value = g?.recommended_sr_preset || "Preset K";
+        document.getElementById("gm-rr-fg").value = `${g?.recommended_rr_preset || ""} | ${
+          g?.recommended_fg_preset || ""
+        }`;
+        document.getElementById("gm-warn").value = g?.warning_banner || "";
+        document.getElementById("gm-unsupported").value = (g?.unsupported_techs || [])
+          .map((u) => `${u.tech}: ${u.reason}`)
+          .join("\n");
+        document.getElementById("gm-settings").value = (g?.recommended_settings || []).join("\n");
+        document.getElementById("modal-edit-game").style.display = "flex";
+      }
+
+      async function submitGameProfile() {
+        const id = document.getElementById("gm-id").value.trim().toLowerCase();
+        const title = document.getElementById("gm-title").value.trim();
+        if (!id || !title) {
+          showToast("ID und Spieletitel sind erforderlich.", true);
+          return;
+        }
+        const splitCsv = (s) =>
+          String(s || "")
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean);
+        const [rrRaw, fgRaw] = document
+          .getElementById("gm-rr-fg")
+          .value.split("|")
+          .map((s) => (s || "").trim());
+
+        const unsupported_techs = document
+          .getElementById("gm-unsupported")
+          .value.split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((line) => {
+            const idx = line.indexOf(":");
+            if (idx < 0) return { tech: line, reason: "" };
+            return {
+              tech: line.slice(0, idx).trim(),
+              reason: line.slice(idx + 1).trim(),
+            };
+          });
+
+        const recommended_settings = document
+          .getElementById("gm-settings")
+          .value.split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+
+        const game = {
+          id,
+          title,
+          steam_app_ids: splitCsv(document.getElementById("gm-appids").value),
+          match_names: [title.toLowerCase()],
+          match_executables: splitCsv(document.getElementById("gm-exes").value),
+          anticheat_status: document.getElementById("gm-ac").value,
+          supported_techs: splitCsv(document.getElementById("gm-techs").value),
+          unsupported_techs,
+          warning_banner: document.getElementById("gm-warn").value.trim() || null,
+          recommended_sr_preset: document.getElementById("gm-sr").value.trim() || null,
+          recommended_rr_preset: rrRaw || null,
+          recommended_fg_preset: fgRaw || null,
+          recommended_settings,
+        };
+
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "upsert",
+            game,
+          });
+          const existingIdx = allGames.findIndex((x) => x.id === game.id);
+          if (existingIdx >= 0) allGames[existingIdx] = res.game || game;
+          else allGames.push(res.game || game);
+          closeModals();
+          renderGames();
+          renderAdminGamesTable();
+          showToast(res.message || "Spiel gespeichert!");
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function deleteGameProfile(id) {
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "delete",
+            id,
+          });
+          allGames = allGames.filter((g) => g.id !== id);
+          renderGames();
+          renderAdminGamesTable();
+          showToast(res.message || "Spiel gelöscht.");
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function exportGamesJsonFile() {
+        const blob = new Blob(
+          [
+            JSON.stringify(
+              {
+                $schema: "../../schema/games.schema.json",
+                schema_version: 1,
+                updated_at: new Date().toISOString(),
+                games: allGames,
+              },
+              null,
+              2
+            ),
+          ],
+          { type: "application/json" }
+        );
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "games.json";
+        a.click();
+      }
+
+      // INITIALIZATION
+      async function init() {
+        try {
+          const r = await fetch("./api/v1/games.json?web_preview=1");
+          const data = await r.json();
+          if (Array.isArray(data.games)) {
+            allGames = data.games;
+          }
+        } catch {}
+        renderGames();
+
+        if (authToken) {
+          try {
+            const me = await apiRequest("/api/auth/me", "GET");
+            currentUser = me.user;
+          } catch {
+            authToken = null;
+            localStorage.removeItem("dlssdb_token");
+          }
+        }
+        renderUserUI();
+      }
+
+      document.getElementById("search").addEventListener("input", renderGames);
+      document.getElementById("ac-filter").addEventListener("change", renderGames);
+      init();
+    </script>
+  </body>
+</html>

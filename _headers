@@ -1,0 +1,6 @@
+/api/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Content-Type: application/json; charset=utf-8
+  Cache-Control: public, max-age=300, s-maxage=600
+

@@ -1,0 +1,13 @@
+name = "dlss-manager-onlinedb"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dlss-manager-db"
+database_id = "9dc64756-7f6e-4298-99d4-137978fbec01"
