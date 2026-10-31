@@ -30,7 +30,7 @@
         padding: 24px 20px 64px;
       }
       .container {
-        max-width: 1220px;
+        max-width: 1280px;
         margin: 0 auto;
       }
       header {
@@ -48,8 +48,12 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
       }
       .badge {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
         font-size: 0.74rem;
         padding: 3px 10px;
         border-radius: 999px;
@@ -63,6 +67,12 @@
         color: #7dd3fc;
         border-color: rgba(56, 189, 248, 0.35);
       }
+      .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
       .nav-tabs {
         display: flex;
         gap: 8px;
@@ -75,8 +85,9 @@
         padding: 8px 15px;
         border-radius: 9px;
         cursor: pointer;
-        font-size: 0.86rem;
+        font-size: 0.85rem;
         font-weight: 600;
+        white-space: nowrap;
         transition: 0.15s;
       }
       .tab-btn:hover {
@@ -87,6 +98,30 @@
         background: rgba(118, 185, 0, 0.16);
         color: #bef264;
         border-color: rgba(118, 185, 0, 0.45);
+      }
+      .lang-switcher {
+        display: inline-flex;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        overflow: hidden;
+      }
+      .lang-btn {
+        background: transparent;
+        color: var(--muted);
+        border: none;
+        padding: 7px 11px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .lang-btn:hover {
+        color: var(--text);
+      }
+      .lang-btn.active {
+        background: rgba(56, 189, 248, 0.18);
+        color: #7dd3fc;
       }
       .view-pane {
         display: none;
@@ -101,16 +136,23 @@
         padding: 7px 13px;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 0.82rem;
+        font-size: 0.81rem;
         font-weight: 600;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
         transition: 0.15s;
       }
       .btn:hover {
         background: rgba(255, 255, 255, 0.13);
+      }
+      .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.77rem;
       }
       .btn-primary {
         background: rgba(118, 185, 0, 0.22);
@@ -179,7 +221,7 @@
         padding: 16px;
       }
       .stat-label {
-        font-size: 0.76rem;
+        font-size: 0.75rem;
         color: var(--muted);
         text-transform: uppercase;
         letter-spacing: 0.04em;
@@ -198,7 +240,7 @@
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 16px;
       }
       .card {
@@ -226,11 +268,14 @@
         font-family: Consolas, monospace;
       }
       .ac-pill {
+        display: inline-flex;
+        align-items: center;
         font-size: 0.72rem;
-        padding: 3px 9px;
+        padding: 3px 10px;
         border-radius: 999px;
         font-weight: 700;
         white-space: nowrap;
+        flex-shrink: 0;
       }
       .ac-safe {
         background: rgba(118, 185, 0, 0.15);
@@ -256,24 +301,35 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
+        align-items: center;
       }
       .tech-chip {
-        font-size: 0.72rem;
-        padding: 2px 8px;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 0.73rem;
+        padding: 3px 9px;
         border-radius: 6px;
         background: rgba(118, 185, 0, 0.14);
         color: #bef264;
         border: 1px solid rgba(118, 185, 0, 0.28);
         font-weight: 600;
+        line-height: 1.3;
       }
       .preset-chip {
-        font-size: 0.72rem;
-        padding: 2px 8px;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 0.73rem;
+        padding: 3px 9px;
         border-radius: 6px;
         background: rgba(56, 189, 248, 0.14);
         color: #7dd3fc;
         border: 1px solid rgba(56, 189, 248, 0.28);
         font-weight: 600;
+        line-height: 1.3;
       }
       .warn-box {
         font-size: 0.78rem;
@@ -313,18 +369,24 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.83rem;
+        font-size: 0.84rem;
       }
       th,
       td {
         text-align: left;
-        padding: 10px 12px;
+        padding: 12px 14px;
         border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.025);
       }
       th {
         color: var(--muted);
-        font-size: 0.75rem;
+        font-size: 0.74rem;
         text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
       }
       .toast {
         position: fixed;
@@ -369,36 +431,43 @@
           <h1>
             <span>☁️ dlssdb.goover.dev</span>
             <span class="badge" id="profile-count-badge">16 Profiles</span>
-            <span class="badge badge-blue" id="backend-mode-badge">Cloudflare Free Tier</span>
+            <span class="badge badge-blue" id="backend-mode-badge">Cloudflare D1 Edge SQLite</span>
           </h1>
-          <p style="color: var(--muted); font-size: 0.86rem; margin-top: 4px">
+          <p style="color: var(--muted); font-size: 0.86rem; margin-top: 4px" data-i18n="header_sub">
             DLSS Manager Online Game Compatibility Database · Personal API Key Portal &amp; Admin Control Center
           </p>
         </div>
 
-        <nav class="nav-tabs">
-          <button class="tab-btn active" onclick="switchTab('games')" id="tab-btn-games">
-            🎮 Game Database
-          </button>
-          <button class="tab-btn" onclick="switchTab('account')" id="tab-btn-account">
-            🔑 My API Key / Account
-          </button>
-          <button class="tab-btn" onclick="switchTab('admin')" id="tab-btn-admin" style="display: none">
-            🛡️ Admin Bereich
-          </button>
-        </nav>
+        <div class="header-controls">
+          <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('games')" id="tab-btn-games" data-i18n="tab_games">
+              🎮 Spiele-Datenbank
+            </button>
+            <button class="tab-btn" onclick="switchTab('account')" id="tab-btn-account" data-i18n="tab_account">
+              🔑 Mein API Key / Account
+            </button>
+            <button class="tab-btn" onclick="switchTab('admin')" id="tab-btn-admin" style="display: none" data-i18n="tab_admin">
+              🛡️ Admin-Bereich
+            </button>
+          </nav>
+
+          <div class="lang-switcher" title="Sprache / Language">
+            <button class="lang-btn" id="lang-btn-de" onclick="setLanguage('de')">🇩🇪 DE</button>
+            <button class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+          </div>
+        </div>
       </header>
 
       <!-- TAB 1: PUBLIC GAME DATABASE EXPLORER -->
       <section class="view-pane active" id="pane-games">
         <div class="panel" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 18px">
           <div>
-            <strong>API Endpoint für DLSS Manager:</strong>
+            <strong data-i18n="endpoint_label">API-Endpunkt für DLSS Manager:</strong>
             <code style="color:var(--blue);margin-left:8px;font-family:Consolas,monospace">https://dlssdb.goover.dev/api/v1/games.json</code>
-            <span style="color:var(--muted);font-size:0.8rem;margin-left:8px">(Erfordert deinen persönlichen API Key im Header <code>X-API-Key</code>)</span>
+            <span style="color:var(--muted);font-size:0.8rem;margin-left:8px" data-i18n="endpoint_hint">(Erfordert deinen persönlichen API Key im Header <code>X-API-Key</code>)</span>
           </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="switchTab('account')">🔑 Eigenen API Key erstellen</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="switchTab('account')" data-i18n="btn_get_api_key">🔑 Eigenen API Key erstellen</button>
             <a class="btn" href="https://github.com/gOOvER/DLSS-Manager" target="_blank">DLSS Manager GitHub ↗</a>
           </div>
         </div>
@@ -409,14 +478,15 @@
             id="search"
             class="input"
             style="flex:1;min-width:240px"
-            placeholder="Search game title, Steam AppID, executable, or technology..."
+            data-i18n-placeholder="search_placeholder"
+            placeholder="Suche nach Spieletitel, Steam AppID, EXE oder Technologie..."
           />
-          <select id="ac-filter" class="select" style="width:auto;min-width:220px">
-            <option value="all">All Anti-Cheat Policies</option>
-            <option value="safe">✅ Safe (Full Swap)</option>
-            <option value="signed_only">🛡️ Signed DLLs Only</option>
-            <option value="driver_override_only">🎛️ Driver Override Only</option>
-            <option value="blocked">⛔ Blocked</option>
+          <select id="ac-filter" class="select" style="width:auto;min-width:230px">
+            <option value="all" data-i18n="ac_filter_all">Alle Anti-Cheat-Einstufungen</option>
+            <option value="safe" data-i18n="ac_filter_safe">✅ Sicher (Voller DLL-Tausch)</option>
+            <option value="signed_only" data-i18n="ac_filter_signed">🛡️ Nur signierte DLLs</option>
+            <option value="driver_override_only" data-i18n="ac_filter_driver">🎛️ Nur Treiber-Override</option>
+            <option value="blocked" data-i18n="ac_filter_blocked">⛔ Gesperrt</option>
           </select>
         </div>
 
@@ -428,41 +498,41 @@
         <!-- Unauthenticated Login / Register View -->
         <div id="auth-guest-view" class="two-col">
           <div class="panel">
-            <h3 style="margin-bottom:6px">🔐 Login</h3>
-            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px">
+            <h3 style="margin-bottom:6px" data-i18n="login_title">🔐 Anmelden</h3>
+            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px" data-i18n="login_sub">
               Melde dich an, um deinen persönlichen API Key für <strong>DLSS Manager</strong> einzusehen oder neu zu generieren.
             </p>
             <div class="form-group">
-              <label>Username oder E-Mail</label>
-              <input type="text" id="login-username" class="input" placeholder="Username oder E-Mail" />
+              <label data-i18n="lbl_user_or_mail">Benutzername oder E-Mail</label>
+              <input type="text" id="login-username" class="input" data-i18n-placeholder="lbl_user_or_mail" placeholder="Benutzername oder E-Mail" />
             </div>
             <div class="form-group">
-              <label>Passwort</label>
+              <label data-i18n="lbl_password">Passwort</label>
               <input type="password" id="login-password" class="input" placeholder="••••••••" />
             </div>
-            <button class="btn btn-primary" onclick="handleLogin()" style="width:100%;justify-content:center;margin-top:4px">
+            <button class="btn btn-primary" onclick="handleLogin()" style="width:100%;justify-content:center;margin-top:4px" data-i18n="btn_login">
               Anmelden
             </button>
           </div>
 
           <div class="panel">
-            <h3 style="margin-bottom:6px">✨ Account &amp; eigenen API Key erstellen</h3>
-            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px">
+            <h3 style="margin-bottom:6px" data-i18n="reg_title">✨ Account &amp; eigenen API Key erstellen</h3>
+            <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px" data-i18n="reg_sub">
               Jeder Nutzer erhält sofort einen eigenen API Key (<code>dlss_live_...</code>). <em>Hinweis: Der allererste registrierte Account wird automatisch als <strong>Admin</strong> eingerichtet!</em>
             </p>
             <div class="form-group">
-              <label>Username</label>
+              <label data-i18n="lbl_username">Benutzername</label>
               <input type="text" id="reg-username" class="input" placeholder="z.B. goover" />
             </div>
             <div class="form-group">
-              <label>E-Mail Adresse</label>
+              <label data-i18n="lbl_email">E-Mail-Adresse</label>
               <input type="email" id="reg-email" class="input" placeholder="name@example.com" />
             </div>
             <div class="form-group">
-              <label>Passwort (mind. 6 Zeichen)</label>
+              <label data-i18n="lbl_password_min">Passwort (mind. 6 Zeichen)</label>
               <input type="password" id="reg-password" class="input" placeholder="••••••••" />
             </div>
-            <button class="btn btn-primary" onclick="handleRegister()" style="width:100%;justify-content:center;margin-top:4px">
+            <button class="btn btn-primary" onclick="handleRegister()" style="width:100%;justify-content:center;margin-top:4px" data-i18n="btn_register">
               Registrieren &amp; API Key generieren
             </button>
           </div>
@@ -479,35 +549,35 @@
                 </h3>
                 <p style="color:var(--muted);font-size:0.82rem" id="user-email-line"></p>
               </div>
-              <button class="btn btn-danger" onclick="handleLogout()">🚪 Abmelden</button>
+              <button class="btn btn-danger" onclick="handleLogout()" data-i18n="btn_logout">🚪 Abmelden</button>
             </div>
 
             <div style="margin-bottom:16px">
-              <label style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">
+              <label style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:6px;font-weight:600" data-i18n="lbl_personal_key">
                 DEIN PERSÖNLICHER DLSS-DB API KEY
               </label>
               <div class="api-key-box">
                 <span id="user-api-key-display">dlss_live_••••••••••••••••••••••••</span>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <button class="btn" onclick="toggleRevealMyKey()">👁️ Zeigen/Verbergen</button>
-                  <button class="btn btn-primary" onclick="copyMyApiKey()">📋 API Key kopieren</button>
-                  <button class="btn" onclick="regenerateMyApiKey()">🔄 Neuen Key generieren</button>
-                  <button class="btn btn-danger" onclick="revokeMyApiKey()">🚫 Key widerrufen</button>
+                  <button class="btn" onclick="toggleRevealMyKey()" data-i18n="btn_show_hide">👁️ Zeigen/Verbergen</button>
+                  <button class="btn btn-primary" onclick="copyMyApiKey()" data-i18n="btn_copy_key">📋 API Key kopieren</button>
+                  <button class="btn" onclick="regenerateMyApiKey()" data-i18n="btn_regen_key">🔄 Neuen Key generieren</button>
+                  <button class="btn btn-danger" onclick="revokeMyApiKey()" data-i18n="btn_revoke_key">🚫 Key widerrufen</button>
                 </div>
               </div>
             </div>
 
             <div class="stats-row" style="margin-top:16px;margin-bottom:0">
               <div class="stat-box">
-                <div class="stat-label">API Sync-Abrufe</div>
+                <div class="stat-label" data-i18n="stat_user_syncs">API Sync-Abrufe</div>
                 <div class="stat-val" id="user-stat-requests">0</div>
               </div>
               <div class="stat-box">
-                <div class="stat-label">Letzter Abruf</div>
-                <div class="stat-val" style="font-size:1rem;margin-top:10px" id="user-stat-last-access">Noch nie</div>
+                <div class="stat-label" data-i18n="stat_user_last">Letzter Abruf</div>
+                <div class="stat-val" style="font-size:1rem;margin-top:10px" id="user-stat-last-access">—</div>
               </div>
               <div class="stat-box">
-                <div class="stat-label">Key erstellt am</div>
+                <div class="stat-label" data-i18n="stat_user_created">Key erstellt am</div>
                 <div class="stat-val" style="font-size:1rem;margin-top:10px" id="user-stat-key-date">—</div>
               </div>
             </div>
@@ -515,22 +585,17 @@
 
           <div class="two-col">
             <div class="panel">
-              <h3 style="margin-bottom:8px">🚀 Einrichtung in DLSS Manager</h3>
-              <ol style="padding-left:18px;color:#cbd5e1;font-size:0.85rem;line-height:1.7">
-                <li>Öffne <strong>DLSS Manager</strong> und wechsle links auf <strong>⚙️ Settings</strong>.</li>
-                <li>Scrolle zur Karte <strong>☁️ Game Compatibility &amp; Settings Database (<code>dlssdb.goover.dev</code>)</strong>.</li>
-                <li>Füge deinen persönlichen <strong>API Key</strong> (<code>dlss_live_...</code>) ein.</li>
-                <li>Klicke auf <strong>🔄 Save Key &amp; Sync Database</strong>.</li>
-              </ol>
+              <h3 style="margin-bottom:8px" data-i18n="setup_guide_title">🚀 Einrichtung in DLSS Manager</h3>
+              <ol style="padding-left:18px;color:#cbd5e1;font-size:0.85rem;line-height:1.7" id="setup-guide-list"></ol>
             </div>
 
             <div class="panel">
-              <h3 style="margin-bottom:8px">🔒 Passwort ändern</h3>
+              <h3 style="margin-bottom:8px" data-i18n="change_pw_title">🔒 Passwort ändern</h3>
               <div class="form-group">
-                <label>Neues Passwort (mind. 6 Zeichen)</label>
-                <input type="password" id="new-password-input" class="input" placeholder="Neues Passwort..." />
+                <label data-i18n="lbl_new_password">Neues Passwort (mind. 6 Zeichen)</label>
+                <input type="password" id="new-password-input" class="input" placeholder="••••••••" />
               </div>
-              <button class="btn btn-primary" onclick="handleChangePassword()">💾 Passwort aktualisieren</button>
+              <button class="btn btn-primary" onclick="handleChangePassword()" data-i18n="btn_save_password">💾 Passwort aktualisieren</button>
             </div>
           </div>
         </div>
@@ -540,19 +605,19 @@
       <section class="view-pane" id="pane-admin">
         <div class="stats-row">
           <div class="stat-box">
-            <div class="stat-label">Registrierte Nutzer</div>
+            <div class="stat-label" data-i18n="adm_stat_users">Registrierte Nutzer</div>
             <div class="stat-val" id="adm-stat-users">0</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Aktive API Keys</div>
+            <div class="stat-label" data-i18n="adm_stat_keys">Aktive API Keys</div>
             <div class="stat-val" id="adm-stat-keys">0</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Gesamte API Syncs</div>
+            <div class="stat-label" data-i18n="adm_stat_requests">Gesamte API Syncs</div>
             <div class="stat-val" id="adm-stat-requests">0</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Spiele-Profile in DB</div>
+            <div class="stat-label" data-i18n="adm_stat_games">Spiele-Profile in DB</div>
             <div class="stat-val" id="adm-stat-games">0</div>
           </div>
         </div>
@@ -561,14 +626,14 @@
         <div class="panel">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
             <div>
-              <h3>👥 Benutzerverwaltung &amp; API Keys</h3>
-              <p style="color:var(--muted);font-size:0.82rem">
+              <h3 data-i18n="adm_users_title">👥 Benutzerverwaltung &amp; API Keys</h3>
+              <p style="color:var(--muted);font-size:0.82rem" data-i18n="adm_users_sub">
                 Verwalte alle Nutzerkonten, Rollen (User / Admin), Sperrungen und persönliche API Keys.
               </p>
             </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn" onclick="loadAdminDashboard()">🔄 Aktualisieren</button>
-              <button class="btn btn-primary" onclick="openCreateUserModal()">➕ Nutzer anlegen</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="loadAdminDashboard()" data-i18n="btn_refresh">🔄 Aktualisieren</button>
+              <button class="btn btn-primary" onclick="openCreateUserModal()" data-i18n="btn_create_user">➕ Nutzer anlegen</button>
             </div>
           </div>
 
@@ -576,13 +641,13 @@
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Username / E-Mail</th>
-                  <th>Rolle</th>
-                  <th>Status</th>
-                  <th>Persönlicher API Key</th>
-                  <th>Abrufe / Letzter Sync</th>
-                  <th>Aktionen</th>
+                  <th style="width:60px">ID</th>
+                  <th style="min-width:190px" data-i18n="th_user_mail">Benutzername / E-Mail</th>
+                  <th style="width:100px" data-i18n="th_role">Rolle</th>
+                  <th style="width:110px" data-i18n="th_status">Status</th>
+                  <th style="min-width:260px" data-i18n="th_apikey">Persönlicher API Key</th>
+                  <th style="min-width:150px" data-i18n="th_syncs">Abrufe / Letzter Sync</th>
+                  <th style="text-align:right" data-i18n="th_actions">Aktionen</th>
                 </tr>
               </thead>
               <tbody id="admin-users-tbody"></tbody>
@@ -594,14 +659,23 @@
         <div class="panel">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
             <div>
-              <h3>🎮 Spiele-Datenbank verwalten (CRUD)</h3>
-              <p style="color:var(--muted);font-size:0.82rem">
+              <h3 data-i18n="adm_games_title">🎮 Spiele-Datenbank verwalten (CRUD)</h3>
+              <p style="color:var(--muted);font-size:0.82rem" data-i18n="adm_games_sub">
                 Füge neue Spieleprofile hinzu oder bearbeite Anti-Cheat-Einstufungen und empfohlene DLSS 4.5 Presets.
               </p>
             </div>
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input
+                type="text"
+                id="admin-game-search"
+                class="input"
+                style="width:240px;padding:7px 11px;font-size:0.82rem"
+                data-i18n-placeholder="adm_game_filter_ph"
+                placeholder="🔎 Spiel in Tabelle filtern..."
+                oninput="renderAdminGamesTable()"
+              />
               <button class="btn" onclick="exportGamesJsonFile()">📥 Export games.json</button>
-              <button class="btn btn-primary" onclick="openGameEditorModal(null)">➕ Neues Spiel hinzufügen</button>
+              <button class="btn btn-primary" onclick="openGameEditorModal(null)" data-i18n="btn_add_game">➕ Neues Spiel hinzufügen</button>
             </div>
           </div>
 
@@ -609,12 +683,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Titel</th>
-                  <th>Anti-Cheat</th>
-                  <th>Unterstützte Techs</th>
-                  <th>Empfohlene Presets</th>
-                  <th>Aktionen</th>
+                  <th style="min-width:230px" data-i18n="th_game_title">Spiel / ID &amp; EXE</th>
+                  <th style="width:170px" data-i18n="th_anticheat">Anti-Cheat</th>
+                  <th style="min-width:300px" data-i18n="th_techs">Unterstützte Techs</th>
+                  <th style="min-width:200px" data-i18n="th_presets">Empfohlene Presets</th>
+                  <th style="width:150px;text-align:right" data-i18n="th_actions">Aktionen</th>
                 </tr>
               </thead>
               <tbody id="admin-games-tbody"></tbody>
@@ -627,29 +700,29 @@
     <!-- Modal: Admin Create User -->
     <div class="modal-backdrop" id="modal-create-user">
       <div class="modal-box" style="max-width:460px">
-        <h3 style="margin-bottom:12px">➕ Neuen Benutzer anlegen</h3>
+        <h3 style="margin-bottom:12px" data-i18n="modal_create_user_title">➕ Neuen Benutzer anlegen</h3>
         <div class="form-group">
-          <label>Username</label>
+          <label data-i18n="lbl_username">Benutzername</label>
           <input type="text" id="adm-new-username" class="input" placeholder="Username" />
         </div>
         <div class="form-group">
-          <label>E-Mail</label>
+          <label data-i18n="lbl_email">E-Mail</label>
           <input type="email" id="adm-new-email" class="input" placeholder="user@example.com" />
         </div>
         <div class="form-group">
-          <label>Start-Passwort (mind. 6 Zeichen)</label>
+          <label data-i18n="lbl_password_min">Passwort (mind. 6 Zeichen)</label>
           <input type="password" id="adm-new-password" class="input" placeholder="••••••••" />
         </div>
         <div class="form-group">
-          <label>Rolle</label>
+          <label data-i18n="th_role">Rolle</label>
           <select id="adm-new-role" class="select">
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
-          <button class="btn" onclick="closeModals()">Abbrechen</button>
-          <button class="btn btn-primary" onclick="submitAdminCreateUser()">✓ Benutzer &amp; API Key erstellen</button>
+          <button class="btn" onclick="closeModals()" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-primary" onclick="submitAdminCreateUser()" data-i18n="btn_create_user_submit">✓ Benutzer &amp; API Key erstellen</button>
         </div>
       </div>
     </div>
@@ -660,64 +733,64 @@
         <h3 style="margin-bottom:12px" id="game-modal-title">🎮 Spiel-Profil bearbeiten</h3>
         <div class="two-col" style="gap:12px">
           <div class="form-group">
-            <label>Eindeutige ID (slug, z.B. <code>starcitizen</code>)</label>
+            <label data-i18n="gm_lbl_id">Eindeutige ID (Slug, z.B. <code>starcitizen</code>)</label>
             <input type="text" id="gm-id" class="input" placeholder="z.B. cyberpunk-2077" />
           </div>
           <div class="form-group">
-            <label>Spieletitel</label>
+            <label data-i18n="gm_lbl_title">Spieletitel</label>
             <input type="text" id="gm-title" class="input" placeholder="z.B. Cyberpunk 2077" />
           </div>
         </div>
         <div class="two-col" style="gap:12px">
           <div class="form-group">
-            <label>Steam App IDs (Komma-getrennt)</label>
+            <label data-i18n="gm_lbl_appids">Steam App IDs (Komma-getrennt)</label>
             <input type="text" id="gm-appids" class="input" placeholder="z.B. 1091500" />
           </div>
           <div class="form-group">
-            <label>Executables (Komma-getrennt)</label>
+            <label data-i18n="gm_lbl_exes">Executables (Komma-getrennt)</label>
             <input type="text" id="gm-exes" class="input" placeholder="z.B. cyberpunk2077.exe" />
           </div>
         </div>
         <div class="two-col" style="gap:12px">
           <div class="form-group">
-            <label>Anti-Cheat Status</label>
+            <label data-i18n="th_anticheat">Anti-Cheat Status</label>
             <select id="gm-ac" class="select">
-              <option value="safe">✅ safe (Voller DLL-Tausch erlaubt)</option>
-              <option value="signed_only">🛡️ signed_only (Nur offiziell signierte DLLs)</option>
-              <option value="driver_override_only">🎛️ driver_override_only (Nur NVIDIA Treiber-Presets)</option>
-              <option value="blocked">⛔ blocked (Updates gesperrt)</option>
+              <option value="safe">✅ safe</option>
+              <option value="signed_only">🛡️ signed_only</option>
+              <option value="driver_override_only">🎛️ driver_override_only</option>
+              <option value="blocked">⛔ blocked</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Unterstützte Technologien (Komma-getrennt)</label>
+            <label data-i18n="gm_lbl_techs">Unterstützte Technologien (Komma-getrennt)</label>
             <input type="text" id="gm-techs" class="input" placeholder="DLSS, DLSS-G, DLSS-RR, Streamline, FSR 3/4, XeSS" />
           </div>
         </div>
         <div class="two-col" style="gap:12px">
           <div class="form-group">
-            <label>Empfohlenes DLSS SR Preset</label>
+            <label data-i18n="gm_lbl_sr">Empfohlenes DLSS SR Preset</label>
             <input type="text" id="gm-sr" class="input" placeholder="Preset K" />
           </div>
           <div class="form-group">
-            <label>Empfohlenes DLSS RR / FG Preset (Format: <code>Preset F | Latest</code>)</label>
+            <label data-i18n="gm_lbl_rr_fg">Empfohlenes DLSS RR | FG Preset (Format: <code>Preset F | Latest</code>)</label>
             <input type="text" id="gm-rr-fg" class="input" placeholder="Preset F | Latest" />
           </div>
         </div>
         <div class="form-group">
-          <label>Warnhinweis-Banner (optional)</label>
+          <label data-i18n="gm_lbl_warn">Warnhinweis-Banner (optional)</label>
           <input type="text" id="gm-warn" class="input" placeholder="Optionaler Anti-Cheat oder Launcher Hinweis..." />
         </div>
         <div class="form-group">
-          <label>Nicht unterstützte Technologien (Eine pro Zeile im Format <code>Tech: Grund</code>)</label>
+          <label data-i18n="gm_lbl_unsupported">Nicht unterstützte Technologien (Eine pro Zeile im Format <code>Tech: Grund</code>)</label>
           <textarea id="gm-unsupported" class="textarea" placeholder="FSR 3/4 & TSR: Direkt in StarCitizen.exe und Data.p4k kompiliert"></textarea>
         </div>
         <div class="form-group">
-          <label>Empfohlene In-Game Einstellungen (Eine pro Zeile)</label>
+          <label data-i18n="gm_lbl_settings">Empfohlene In-Game Einstellungen (Eine pro Zeile)</label>
           <textarea id="gm-settings" class="textarea" placeholder="Upscaling: DLSS Quality (Preset K)"></textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
-          <button class="btn" onclick="closeModals()">Abbrechen</button>
-          <button class="btn btn-primary" onclick="submitGameProfile()">💾 Profil speichern</button>
+          <button class="btn" onclick="closeModals()" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-primary" onclick="submitGameProfile()" data-i18n="btn_save_profile">💾 Profil speichern</button>
         </div>
       </div>
     </div>
@@ -728,21 +801,271 @@
       let currentUser = null;
       let revealMyKey = false;
       let adminUsersList = [];
+      let currentLang =
+        localStorage.getItem("dlssdb_lang") ||
+        (navigator.language?.toLowerCase().startsWith("de") ? "de" : "en");
 
-      const acLabels = {
-        safe: "✅ Safe",
-        signed_only: "🛡️ Signed DLLs Only",
-        driver_override_only: "🎛️ Driver Override Only",
-        blocked: "⛔ Blocked",
+      const I18N = {
+        de: {
+          header_sub:
+            "DLSS Manager Online-Spieledatenbank · Persönliches API-Key-Portal & Admin-Center",
+          tab_games: "🎮 Spiele-Datenbank",
+          tab_account: "🔑 Mein API Key / Account",
+          tab_admin: "🛡️ Admin-Bereich",
+          endpoint_label: "API-Endpunkt für DLSS Manager:",
+          endpoint_hint:
+            "(Erfordert deinen persönlichen API Key im Header <code>X-API-Key</code>)",
+          btn_get_api_key: "🔑 Eigenen API Key erstellen",
+          search_placeholder:
+            "Suche nach Spieletitel, Steam AppID, EXE oder Technologie...",
+          ac_filter_all: "Alle Anti-Cheat-Einstufungen",
+          ac_filter_safe: "✅ Sicher (Voller DLL-Tausch)",
+          ac_filter_signed: "🛡️ Nur signierte DLLs",
+          ac_filter_driver: "🎛️ Nur Treiber-Override",
+          ac_filter_blocked: "⛔ Gesperrt",
+          ac_badge_safe: "✅ Sicher",
+          ac_badge_signed_only: "🛡️ Nur signierte DLLs",
+          ac_badge_driver_override_only: "🎛️ Nur Treiber-Override",
+          ac_badge_blocked: "⛔ Gesperrt",
+          login_title: "🔐 Anmelden",
+          login_sub:
+            "Melde dich an, um deinen persönlichen API Key für <strong>DLSS Manager</strong> einzusehen oder neu zu generieren.",
+          lbl_user_or_mail: "Benutzername oder E-Mail",
+          lbl_password: "Passwort",
+          btn_login: "Anmelden",
+          reg_title: "✨ Account & eigenen API Key erstellen",
+          reg_sub:
+            "Jeder Nutzer erhält sofort einen eigenen API Key (<code>dlss_live_...</code>). <em>Hinweis: Der allererste registrierte Account wird automatisch als <strong>Admin</strong> eingerichtet!</em>",
+          lbl_username: "Benutzername",
+          lbl_email: "E-Mail-Adresse",
+          lbl_password_min: "Passwort (mind. 6 Zeichen)",
+          btn_register: "Registrieren & API Key generieren",
+          btn_logout: "🚪 Abmelden",
+          lbl_personal_key: "DEIN PERSÖNLICHER DLSS-DB API KEY",
+          btn_show_hide: "👁️ Zeigen/Verbergen",
+          btn_copy_key: "📋 API Key kopieren",
+          btn_regen_key: "🔄 Neuen Key generieren",
+          btn_revoke_key: "🚫 Key widerrufen",
+          stat_user_syncs: "API Sync-Abrufe",
+          stat_user_last: "Letzter Abruf",
+          stat_user_created: "Key erstellt am",
+          setup_guide_title: "🚀 Einrichtung in DLSS Manager",
+          setup_steps: [
+            "Öffne <strong>DLSS Manager</strong> und wechsle links auf <strong>⚙️ Settings</strong>.",
+            "Scrolle zur Karte <strong>☁️ Game Compatibility &amp; Settings Database (<code>dlssdb.goover.dev</code>)</strong>.",
+            "Füge deinen persönlichen <strong>API Key</strong> (<code>dlss_live_...</code>) ein.",
+            "Klicke auf <strong>🔄 Save Key &amp; Sync Database</strong>.",
+          ],
+          change_pw_title: "🔒 Passwort ändern",
+          lbl_new_password: "Neues Passwort (mind. 6 Zeichen)",
+          btn_save_password: "💾 Passwort aktualisieren",
+          adm_stat_users: "Registrierte Nutzer",
+          adm_stat_keys: "Aktive API Keys",
+          adm_stat_requests: "Gesamte API Syncs",
+          adm_stat_games: "Spiele-Profile in DB",
+          adm_users_title: "👥 Benutzerverwaltung & API Keys",
+          adm_users_sub:
+            "Verwalte alle Nutzerkonten, Rollen (User / Admin), Sperrungen und persönliche API Keys.",
+          btn_refresh: "🔄 Aktualisieren",
+          btn_create_user: "➕ Nutzer anlegen",
+          th_user_mail: "Benutzername / E-Mail",
+          th_role: "Rolle",
+          th_status: "Status",
+          th_apikey: "Persönlicher API Key",
+          th_syncs: "Abrufe / Letzter Sync",
+          th_actions: "Aktionen",
+          adm_games_title: "🎮 Spiele-Datenbank verwalten (CRUD)",
+          adm_games_sub:
+            "Füge neue Spieleprofile hinzu oder bearbeite Anti-Cheat-Einstufungen und empfohlene DLSS 4.5 Presets.",
+          adm_game_filter_ph: "🔎 Spiel in Tabelle filtern...",
+          btn_add_game: "➕ Neues Spiel hinzufügen",
+          th_game_title: "Spiel / ID & EXE",
+          th_anticheat: "Anti-Cheat",
+          th_techs: "Unterstützte Techs",
+          th_presets: "Empfohlene Presets",
+          btn_edit: "✏️ Bearbeiten",
+          no_ext_dlls: "Keine externen DLLs",
+          status_active: "● Aktiv",
+          status_suspended: "⛔ Gesperrt",
+          no_key: "Kein Key",
+          never_synced: "Noch kein Sync",
+          btn_suspend: "⏸️ Sperren",
+          btn_activate: "▶️ Aktivieren",
+          modal_create_user_title: "➕ Neuen Benutzer anlegen",
+          btn_cancel: "Abbrechen",
+          btn_create_user_submit: "✓ Benutzer & API Key erstellen",
+          gm_lbl_id: "Eindeutige ID (Slug, z.B. <code>starcitizen</code>)",
+          gm_lbl_title: "Spieletitel",
+          gm_lbl_appids: "Steam App IDs (Komma-getrennt)",
+          gm_lbl_exes: "Executables (Komma-getrennt)",
+          gm_lbl_techs: "Unterstützte Technologien (Komma-getrennt)",
+          gm_lbl_sr: "Empfohlenes DLSS SR Preset",
+          gm_lbl_rr_fg: "Empfohlenes DLSS RR | FG Preset (Format: <code>Preset F | Latest</code>)",
+          gm_lbl_warn: "Warnhinweis-Banner (optional)",
+          gm_lbl_unsupported:
+            "Nicht unterstützte Technologien (Eine pro Zeile im Format <code>Tech: Grund</code>)",
+          gm_lbl_settings: "Empfohlene In-Game Einstellungen (Eine pro Zeile)",
+          btn_save_profile: "💾 Profil speichern",
+          profiles_suffix: "Profile",
+          hello_user: "Hallo",
+          account_created_on: "Account erstellt am",
+          no_active_key_msg:
+            "Kein aktiver API Key — bitte auf '🔄 Neuen Key generieren' klicken.",
+        },
+        en: {
+          header_sub:
+            "DLSS Manager Online Game Compatibility Database · Personal API Key Portal & Admin Control Center",
+          tab_games: "🎮 Game Database",
+          tab_account: "🔑 My API Key / Account",
+          tab_admin: "🛡️ Admin Area",
+          endpoint_label: "API Endpoint for DLSS Manager:",
+          endpoint_hint:
+            "(Requires your personal API Key in the <code>X-API-Key</code> header)",
+          btn_get_api_key: "🔑 Create Personal API Key",
+          search_placeholder:
+            "Search game title, Steam AppID, executable, or technology...",
+          ac_filter_all: "All Anti-Cheat Policies",
+          ac_filter_safe: "✅ Safe (Full DLL Swap)",
+          ac_filter_signed: "🛡️ Signed DLLs Only",
+          ac_filter_driver: "🎛️ Driver Override Only",
+          ac_filter_blocked: "⛔ Blocked",
+          ac_badge_safe: "✅ Safe",
+          ac_badge_signed_only: "🛡️ Signed DLLs Only",
+          ac_badge_driver_override_only: "🎛️ Driver Override Only",
+          ac_badge_blocked: "⛔ Blocked",
+          login_title: "🔐 Sign In",
+          login_sub:
+            "Sign in to view or regenerate your personal API Key for <strong>DLSS Manager</strong>.",
+          lbl_user_or_mail: "Username or Email",
+          lbl_password: "Password",
+          btn_login: "Sign In",
+          reg_title: "✨ Create Account & Personal API Key",
+          reg_sub:
+            "Every user immediately receives a personal API Key (<code>dlss_live_...</code>). <em>Note: The very first registered account is automatically granted <strong>Admin</strong> privileges!</em>",
+          lbl_username: "Username",
+          lbl_email: "Email Address",
+          lbl_password_min: "Password (min. 6 characters)",
+          btn_register: "Register & Generate API Key",
+          btn_logout: "🚪 Sign Out",
+          lbl_personal_key: "YOUR PERSONAL DLSS-DB API KEY",
+          btn_show_hide: "👁️ Show/Hide",
+          btn_copy_key: "📋 Copy API Key",
+          btn_regen_key: "🔄 Generate New Key",
+          btn_revoke_key: "🚫 Revoke Key",
+          stat_user_syncs: "API Sync Requests",
+          stat_user_last: "Last Sync Access",
+          stat_user_created: "Key Created At",
+          setup_guide_title: "🚀 Setup in DLSS Manager",
+          setup_steps: [
+            "Open <strong>DLSS Manager</strong> and navigate to <strong>⚙️ Settings</strong>.",
+            "Scroll to the <strong>☁️ Game Compatibility &amp; Settings Database (<code>dlssdb.goover.dev</code>)</strong> card.",
+            "Paste your personal <strong>API Key</strong> (<code>dlss_live_...</code>).",
+            "Click <strong>🔄 Save Key &amp; Sync Database</strong>.",
+          ],
+          change_pw_title: "🔒 Change Password",
+          lbl_new_password: "New Password (min. 6 characters)",
+          btn_save_password: "💾 Update Password",
+          adm_stat_users: "Registered Users",
+          adm_stat_keys: "Active API Keys",
+          adm_stat_requests: "Total API Syncs",
+          adm_stat_games: "Game Profiles in DB",
+          adm_users_title: "👥 User Management & API Keys",
+          adm_users_sub:
+            "Manage all user accounts, roles (User / Admin), suspensions, and personal API keys.",
+          btn_refresh: "🔄 Refresh",
+          btn_create_user: "➕ Create User",
+          th_user_mail: "Username / Email",
+          th_role: "Role",
+          th_status: "Status",
+          th_apikey: "Personal API Key",
+          th_syncs: "Requests / Last Sync",
+          th_actions: "Actions",
+          adm_games_title: "🎮 Manage Game Database (CRUD)",
+          adm_games_sub:
+            "Add new game profiles or edit Anti-Cheat policies and recommended DLSS 4.5 presets.",
+          adm_game_filter_ph: "🔎 Filter games in table...",
+          btn_add_game: "➕ Add New Game",
+          th_game_title: "Game / ID & EXE",
+          th_anticheat: "Anti-Cheat",
+          th_techs: "Supported Techs",
+          th_presets: "Recommended Presets",
+          btn_edit: "✏️ Edit",
+          no_ext_dlls: "No external DLLs",
+          status_active: "● Active",
+          status_suspended: "⛔ Suspended",
+          no_key: "No Key",
+          never_synced: "Never synced",
+          btn_suspend: "⏸️ Suspend",
+          btn_activate: "▶️ Activate",
+          modal_create_user_title: "➕ Create New User",
+          btn_cancel: "Cancel",
+          btn_create_user_submit: "✓ Create User & API Key",
+          gm_lbl_id: "Unique ID (Slug, e.g. <code>starcitizen</code>)",
+          gm_lbl_title: "Game Title",
+          gm_lbl_appids: "Steam App IDs (comma-separated)",
+          gm_lbl_exes: "Executables (comma-separated)",
+          gm_lbl_techs: "Supported Technologies (comma-separated)",
+          gm_lbl_sr: "Recommended DLSS SR Preset",
+          gm_lbl_rr_fg: "Recommended DLSS RR | FG Preset (format: <code>Preset F | Latest</code>)",
+          gm_lbl_warn: "Warning Banner (optional)",
+          gm_lbl_unsupported:
+            "Unsupported Technologies (one per line in format <code>Tech: Reason</code>)",
+          gm_lbl_settings: "Recommended In-Game Settings (one per line)",
+          btn_save_profile: "💾 Save Profile",
+          profiles_suffix: "Profiles",
+          hello_user: "Hello",
+          account_created_on: "Account created on",
+          no_active_key_msg:
+            "No active API Key — click '🔄 Generate New Key' to create one.",
+        },
       };
 
+      function t(key) {
+        return I18N[currentLang]?.[key] || I18N.de[key] || key;
+      }
+
+      function getAcLabel(status) {
+        return t(`ac_badge_${status}`) || status;
+      }
+
+      function setLanguage(lang) {
+        currentLang = lang === "en" ? "en" : "de";
+        localStorage.setItem("dlssdb_lang", currentLang);
+        document.documentElement.lang = currentLang;
+        document.getElementById("lang-btn-de").classList.toggle("active", currentLang === "de");
+        document.getElementById("lang-btn-en").classList.toggle("active", currentLang === "en");
+
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const k = el.getAttribute("data-i18n");
+          if (k) el.innerHTML = t(k);
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const k = el.getAttribute("data-i18n-placeholder");
+          if (k) el.setAttribute("placeholder", t(k));
+        });
+
+        const guideEl = document.getElementById("setup-guide-list");
+        if (guideEl) {
+          guideEl.innerHTML = (I18N[currentLang].setup_steps || [])
+            .map((step) => `<li>${step}</li>`)
+            .join("");
+        }
+
+        renderGames();
+        renderUserUI();
+        if (currentUser?.role === "admin") {
+          renderAdminUsersTable();
+          renderAdminGamesTable();
+        }
+      }
+
       function showToast(msg, isError = false) {
-        const t = document.createElement("div");
-        t.className = "toast";
-        if (isError) t.style.borderLeftColor = "#ef4444";
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 4000);
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        if (isError) toast.style.borderLeftColor = "#ef4444";
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
       }
 
       function esc(str) {
@@ -763,7 +1086,6 @@
         }
       }
 
-      // Local fallback storage if previewed statically without Cloudflare Pages Functions
       function getLocalFallbackState() {
         const raw = localStorage.getItem("dlssdb_local_state");
         if (raw) {
@@ -813,18 +1135,17 @@
         }
       }
 
-      // Seamless client-side fallback when testing via static file server before deploying to Cloudflare Pages
       function handleLocalFallbackApi(path, method, body) {
         const st = getLocalFallbackState();
         const now = new Date().toISOString();
 
         if (path === "/api/auth/register" && method === "POST") {
           const { username, email, password } = body;
-          if (!username || username.length < 3) throw new Error("Username mind. 3 Zeichen.");
-          if (!email || !email.includes("@")) throw new Error("Gültige E-Mail erforderlich.");
-          if (!password || password.length < 6) throw new Error("Passwort mind. 6 Zeichen.");
+          if (!username || username.length < 3) throw new Error("Username min 3 chars.");
+          if (!email || !email.includes("@")) throw new Error("Valid email required.");
+          if (!password || password.length < 6) throw new Error("Password min 6 chars.");
           if (st.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
-            throw new Error("Username bereits vergeben.");
+            throw new Error("Username already exists.");
           }
           const user = {
             id: st.users.length + 1,
@@ -851,8 +1172,8 @@
               (x.username.toLowerCase() === login || x.email.toLowerCase() === login) &&
               x.password === body.password
           );
-          if (!u) throw new Error("Ungültige Zugangsdaten.");
-          if (!u.is_active) throw new Error("Account ist gesperrt.");
+          if (!u) throw new Error("Invalid credentials.");
+          if (!u.is_active) throw new Error("Account suspended.");
           return { token: `local_${u.id}`, user: u };
         }
 
@@ -860,30 +1181,30 @@
         const me = st.users.find((x) => x.id === uid);
 
         if (path === "/api/auth/me") {
-          if (!me) throw new Error("Nicht angemeldet");
+          if (!me) throw new Error("Not signed in");
           if (method === "GET") return { user: me };
           if (body.action === "generate_key") {
             me.api_key = genRandomKey();
             me.api_key_created_at = now;
             saveLocalFallbackState(st);
-            return { message: "Neuer API Key generiert!", user: me };
+            return { message: "OK", user: me };
           }
           if (body.action === "revoke_key") {
             me.api_key = null;
             me.api_key_created_at = null;
             saveLocalFallbackState(st);
-            return { message: "API Key widerrufen.", user: me };
+            return { message: "OK", user: me };
           }
           if (body.action === "change_password") {
             me.password = body.new_password;
             saveLocalFallbackState(st);
-            return { message: "Passwort geändert." };
+            return { message: "OK" };
           }
-          if (body.action === "logout") return { message: "Abgemeldet." };
+          if (body.action === "logout") return { message: "OK" };
         }
 
         if (path === "/api/admin/users") {
-          if (!me || me.role !== "admin") throw new Error("Admin-Rechte erforderlich.");
+          if (!me || me.role !== "admin") throw new Error("Admin required.");
           if (method === "GET") {
             return {
               stats: {
@@ -911,10 +1232,10 @@
             };
             st.users.push(nu);
             saveLocalFallbackState(st);
-            return { message: "Benutzer erstellt." };
+            return { message: "Created." };
           }
           const target = st.users.find((u) => u.id === Number(body.user_id));
-          if (!target) throw new Error("Benutzer nicht gefunden");
+          if (!target) throw new Error("User not found");
           if (body.action === "toggle_active") target.is_active = target.is_active ? 0 : 1;
           if (body.action === "set_role") target.role = body.role;
           if (body.action === "regenerate_key") {
@@ -926,17 +1247,17 @@
             st.users = st.users.filter((u) => u.id !== target.id);
           }
           saveLocalFallbackState(st);
-          return { message: "Aktion ausgeführt." };
+          return { message: "OK" };
         }
 
         if (path === "/api/admin/games") {
-          if (!me || me.role !== "admin") throw new Error("Admin-Rechte erforderlich.");
+          if (!me || me.role !== "admin") throw new Error("Admin required.");
           if (method === "GET") return { games: allGames };
           if (body.action === "delete") {
             allGames = allGames.filter((g) => g.id !== body.id);
             st.games = allGames;
             saveLocalFallbackState(st);
-            return { message: "Spiel gelöscht." };
+            return { message: "Deleted." };
           }
           const g = body.game;
           const idx = allGames.findIndex((x) => x.id === g.id);
@@ -944,10 +1265,10 @@
           else allGames.push(g);
           st.games = allGames;
           saveLocalFallbackState(st);
-          return { message: "Spiel gespeichert.", game: g };
+          return { message: "Saved.", game: g };
         }
 
-        throw new Error("Unbekannter Endpunkt");
+        throw new Error("Unknown endpoint");
       }
 
       function renderGames() {
@@ -968,7 +1289,7 @@
           return hay.includes(q);
         });
 
-        document.getElementById("profile-count-badge").textContent = `${allGames.length} Profiles`;
+        document.getElementById("profile-count-badge").textContent = `${allGames.length} ${t("profiles_suffix")}`;
 
         const grid = document.getElementById("games-grid");
         grid.innerHTML = filtered
@@ -980,11 +1301,11 @@
                 <div class="card-title">${esc(g.title)}</div>
                 <div class="card-id">${esc(g.id)} · ${(g.match_executables || []).map(esc).join(", ")}</div>
               </div>
-              <span class="ac-pill ac-${esc(g.anticheat_status)}">${acLabels[g.anticheat_status] || esc(g.anticheat_status)}</span>
+              <span class="ac-pill ac-${esc(g.anticheat_status)}">${getAcLabel(g.anticheat_status)}</span>
             </div>
 
             <div class="tech-chips">
-              ${(g.supported_techs || []).map((t) => `<span class="tech-chip">${esc(t)}</span>`).join("")}
+              ${(g.supported_techs || []).map((tech) => `<span class="tech-chip">${esc(tech)}</span>`).join("")}
               ${g.recommended_sr_preset ? `<span class="preset-chip">SR: ${esc(g.recommended_sr_preset)}</span>` : ""}
               ${g.recommended_rr_preset ? `<span class="preset-chip">RR: ${esc(g.recommended_rr_preset)}</span>` : ""}
               ${g.recommended_fg_preset ? `<span class="preset-chip">FG: ${esc(g.recommended_fg_preset)}</span>` : ""}
@@ -1030,15 +1351,15 @@
         userEl.style.display = "block";
         adminTabBtn.style.display = currentUser.role === "admin" ? "inline-flex" : "none";
 
-        document.getElementById("user-greeting").textContent = `Hallo, ${currentUser.username}!`;
+        document.getElementById("user-greeting").textContent = `${t("hello_user")}, ${currentUser.username}!`;
         const rBadge = document.getElementById("user-role-badge");
         rBadge.textContent = currentUser.role.toUpperCase();
         rBadge.className = currentUser.role === "admin" ? "badge" : "badge badge-blue";
-        document.getElementById("user-email-line").textContent = `${currentUser.email} · Account erstellt am ${new Date(currentUser.created_at).toLocaleDateString()}`;
+        document.getElementById("user-email-line").textContent = `${currentUser.email} · ${t("account_created_on")} ${new Date(currentUser.created_at).toLocaleDateString()}`;
 
         const keyEl = document.getElementById("user-api-key-display");
         if (!currentUser.api_key) {
-          keyEl.textContent = "Kein aktiver API Key — bitte auf '🔄 Neuen Key generieren' klicken.";
+          keyEl.textContent = t("no_active_key_msg");
           keyEl.style.color = "#fca5a5";
         } else {
           keyEl.style.color = "#bef264";
@@ -1051,7 +1372,7 @@
           currentUser.api_requests_count || 0;
         document.getElementById("user-stat-last-access").textContent = currentUser.last_api_access
           ? new Date(currentUser.last_api_access).toLocaleString()
-          : "Noch kein Sync";
+          : t("never_synced");
         document.getElementById("user-stat-key-date").textContent = currentUser.api_key_created_at
           ? new Date(currentUser.api_key_created_at).toLocaleString()
           : "—";
@@ -1072,9 +1393,7 @@
           currentUser = res.user;
           revealMyKey = true;
           renderUserUI();
-          showToast(
-            `✓ Willkommen ${currentUser.username}! Dein persönlicher API Key wurde erstellt.`
-          );
+          showToast(`✓ ${currentUser.username} — API Key created!`);
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1089,7 +1408,7 @@
           localStorage.setItem("dlssdb_token", authToken);
           currentUser = res.user;
           renderUserUI();
-          showToast(`✓ Angemeldet als ${currentUser.username}`);
+          showToast(`✓ ${currentUser.username}`);
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1104,7 +1423,6 @@
         localStorage.removeItem("dlssdb_token");
         renderUserUI();
         switchTab("account");
-        showToast("Abgemeldet.");
       }
 
       function toggleRevealMyKey() {
@@ -1113,12 +1431,9 @@
       }
 
       function copyMyApiKey() {
-        if (!currentUser?.api_key) {
-          showToast("Bitte generiere zuerst einen API Key.", true);
-          return;
-        }
+        if (!currentUser?.api_key) return;
         navigator.clipboard.writeText(currentUser.api_key);
-        showToast("📋 Persönlicher API Key in die Zwischenablage kopiert!");
+        showToast("📋 API Key copied!");
       }
 
       async function regenerateMyApiKey() {
@@ -1127,7 +1442,7 @@
           currentUser = res.user;
           revealMyKey = true;
           renderUserUI();
-          showToast("🔄 Neuer persönlicher API Key generiert!");
+          showToast("🔄 API Key regenerated!");
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1138,7 +1453,7 @@
           const res = await apiRequest("/api/auth/me", "POST", { action: "revoke_key" });
           currentUser = res.user;
           renderUserUI();
-          showToast("🚫 API Key widerrufen.");
+          showToast("🚫 API Key revoked.");
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1152,7 +1467,7 @@
             new_password,
           });
           document.getElementById("new-password-input").value = "";
-          showToast(res.message || "Passwort aktualisiert.");
+          showToast(res.message || "✓");
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1194,34 +1509,34 @@
             <td>
               ${
                 Number(u.is_active) === 1
-                  ? `<span style="color:#a3e635;font-weight:600">● Aktiv</span>`
-                  : `<span style="color:#fca5a5;font-weight:600">⛔ Gesperrt</span>`
+                  ? `<span style="color:#a3e635;font-weight:600;white-space:nowrap">${t("status_active")}</span>`
+                  : `<span style="color:#fca5a5;font-weight:600;white-space:nowrap">${t("status_suspended")}</span>`
               }
             </td>
-            <td style="font-family:Consolas,monospace;font-size:0.78rem">
+            <td style="font-family:Consolas,monospace;font-size:0.78rem;white-space:nowrap">
               ${
                 u.api_key
                   ? `<span style="color:#bef264">${esc(u.api_key)}</span>`
-                  : `<span style="color:var(--muted)">Kein Key</span>`
+                  : `<span style="color:var(--muted)">${t("no_key")}</span>`
               }
             </td>
-            <td>
+            <td style="white-space:nowrap">
               <strong>${u.api_requests_count || 0}</strong> Syncs
               <div style="color:var(--muted);font-size:0.74rem">${
-                u.last_api_access ? new Date(u.last_api_access).toLocaleString() : "Nie"
+                u.last_api_access ? new Date(u.last_api_access).toLocaleString() : t("never_synced")
               }</div>
             </td>
-            <td>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn" onclick="adminUserAction(${u.id}, 'regenerate_key')" title="Neuen API Key generieren">🔄 Key</button>
-                <button class="btn" onclick="adminUserAction(${u.id}, 'revoke_key')" title="API Key widerrufen">🚫 Key</button>
-                <button class="btn" onclick="adminUserAction(${u.id}, 'set_role', '${
+            <td style="text-align:right">
+              <div style="display:inline-flex;gap:6px;flex-wrap:nowrap;align-items:center;justify-content:flex-end">
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'regenerate_key')">🔄 Key</button>
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'revoke_key')">🚫 Key</button>
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'set_role', '${
               u.role === "admin" ? "user" : "admin"
             }')">${u.role === "admin" ? "⬇️ User" : "⬆️ Admin"}</button>
-                <button class="btn" onclick="adminUserAction(${u.id}, 'toggle_active')">${
-              Number(u.is_active) === 1 ? "⏸️ Sperren" : "▶️ Aktivieren"
+                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'toggle_active')">${
+              Number(u.is_active) === 1 ? t("btn_suspend") : t("btn_activate")
             }</button>
-                <button class="btn btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')">🗑️</button>
+                <button class="btn btn-sm btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')">🗑️</button>
               </div>
             </td>
           </tr>`
@@ -1236,7 +1551,7 @@
             action,
             role,
           });
-          showToast(res.message || "Aktion ausgeführt.");
+          showToast(res.message || "✓");
           if (userId === currentUser?.id) {
             const meRes = await apiRequest("/api/auth/me", "GET");
             currentUser = meRes.user;
@@ -1271,7 +1586,7 @@
             role,
           });
           closeModals();
-          showToast(res.message || "Benutzer angelegt!");
+          showToast(res.message || "✓");
           loadAdminDashboard();
         } catch (e) {
           showToast(e.message, true);
@@ -1280,35 +1595,74 @@
 
       function renderAdminGamesTable() {
         const tbody = document.getElementById("admin-games-tbody");
-        tbody.innerHTML = allGames
-          .map(
-            (g) => `
+        const q = (document.getElementById("admin-game-search")?.value || "")
+          .toLowerCase()
+          .trim();
+        const filtered = allGames.filter((g) => {
+          if (!q) return true;
+          return `${g.id} ${g.title} ${(g.supported_techs || []).join(" ")} ${(
+            g.match_executables || []
+          ).join(" ")}`
+            .toLowerCase()
+            .includes(q);
+        });
+
+        tbody.innerHTML = filtered
+          .map((g) => {
+            const techsHtml =
+              (g.supported_techs || []).length > 0
+                ? `<div class="tech-chips">${(g.supported_techs || [])
+                    .map((tech) => `<span class="tech-chip">${esc(tech)}</span>`)
+                    .join("")}</div>`
+                : `<span style="color:var(--muted);font-size:0.78rem">${t("no_ext_dlls")}</span>`;
+
+            const presets = [];
+            if (g.recommended_sr_preset)
+              presets.push(`<span class="preset-chip">SR: ${esc(g.recommended_sr_preset)}</span>`);
+            if (g.recommended_rr_preset)
+              presets.push(`<span class="preset-chip">RR: ${esc(g.recommended_rr_preset)}</span>`);
+            if (g.recommended_fg_preset)
+              presets.push(`<span class="preset-chip">FG: ${esc(g.recommended_fg_preset)}</span>`);
+            const presetsHtml =
+              presets.length > 0
+                ? `<div class="tech-chips">${presets.join("")}</div>`
+                : `<span style="color:var(--muted)">—</span>`;
+
+            const exeSub = (g.match_executables || []).length
+              ? ` · ${(g.match_executables || []).map(esc).join(", ")}`
+              : "";
+
+            return `
           <tr>
-            <td style="font-family:Consolas,monospace;font-size:0.78rem">${esc(g.id)}</td>
-            <td><strong>${esc(g.title)}</strong></td>
-            <td><span class="ac-pill ac-${esc(g.anticheat_status)}">${
-              acLabels[g.anticheat_status] || esc(g.anticheat_status)
-            }</span></td>
-            <td>${(g.supported_techs || []).map((t) => `<span class="tech-chip" style="margin-right:4px">${esc(t)}</span>`).join("")}</td>
             <td>
-              ${g.recommended_sr_preset ? `<span class="preset-chip">SR: ${esc(g.recommended_sr_preset)}</span>` : "—"}
-            </td>
-            <td>
-              <div style="display:flex;gap:6px">
-                <button class="btn" onclick="openGameEditorModal('${esc(g.id)}')">✏️ Bearbeiten</button>
-                <button class="btn btn-danger" onclick="deleteGameProfile('${esc(g.id)}')">🗑️</button>
+              <div style="font-weight:700;font-size:0.93rem">${esc(g.title)}</div>
+              <div style="font-family:Consolas,monospace;font-size:0.74rem;color:var(--muted);margin-top:2px">
+                ${esc(g.id)}${exeSub}
               </div>
             </td>
-          </tr>`
-          )
+            <td>
+              <span class="ac-pill ac-${esc(g.anticheat_status)}">${getAcLabel(
+              g.anticheat_status
+            )}</span>
+            </td>
+            <td>${techsHtml}</td>
+            <td>${presetsHtml}</td>
+            <td style="text-align:right">
+              <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap">
+                <button class="btn btn-sm" onclick="openGameEditorModal('${esc(g.id)}')">${t("btn_edit")}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteGameProfile('${esc(g.id)}')">🗑️</button>
+              </div>
+            </td>
+          </tr>`;
+          })
           .join("");
       }
 
       function openGameEditorModal(gameId) {
         const g = gameId ? allGames.find((x) => x.id === gameId) : null;
         document.getElementById("game-modal-title").textContent = g
-          ? `✏️ ${g.title} bearbeiten`
-          : "➕ Neues Spiel-Profil anlegen";
+          ? `✏️ ${g.title}`
+          : t("btn_add_game");
         document.getElementById("gm-id").value = g?.id || "";
         document.getElementById("gm-title").value = g?.title || "";
         document.getElementById("gm-appids").value = (g?.steam_app_ids || []).join(", ");
@@ -1330,10 +1684,7 @@
       async function submitGameProfile() {
         const id = document.getElementById("gm-id").value.trim().toLowerCase();
         const title = document.getElementById("gm-title").value.trim();
-        if (!id || !title) {
-          showToast("ID und Spieletitel sind erforderlich.", true);
-          return;
-        }
+        if (!id || !title) return;
         const splitCsv = (s) =>
           String(s || "")
             .split(",")
@@ -1391,7 +1742,7 @@
           closeModals();
           renderGames();
           renderAdminGamesTable();
-          showToast(res.message || "Spiel gespeichert!");
+          showToast(res.message || "✓");
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1406,7 +1757,7 @@
           allGames = allGames.filter((g) => g.id !== id);
           renderGames();
           renderAdminGamesTable();
-          showToast(res.message || "Spiel gelöscht.");
+          showToast(res.message || "✓");
         } catch (e) {
           showToast(e.message, true);
         }
@@ -1436,6 +1787,7 @@
 
       // INITIALIZATION
       async function init() {
+        setLanguage(currentLang);
         try {
           const r = await fetch("./api/v1/games.json?web_preview=1");
           const data = await r.json();
