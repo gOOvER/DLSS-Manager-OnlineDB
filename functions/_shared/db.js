@@ -120,15 +120,15 @@ export const SEED_GAMES = [
     id: "overwatch-2",
     title: "Overwatch 2",
     steam_app_ids: ["2357570"],
-    match_names: ["overwatch 2", "overwatch"],
+    match_names: ["overwatch 2", "overwatch", "overwatch®"],
     match_executables: ["overwatch.exe"],
     anticheat_status: "signed_only",
-    supported_techs: ["DLSS"],
+    supported_techs: ["DLSS", "FSR 3/4", "XeSS"],
     unsupported_techs: [
       {
         tech: "DLSS-G (Frame Gen)",
         reason:
-          "Overwatch 2 supports DLSS Super Resolution & NVIDIA Reflex, but does not ship with DLSS Frame Generation (nvngx_dlssg.dll).",
+          "Overwatch 2 supports DLSS Super Resolution, AMD FSR 3 & Intel XeSS, but does not ship with NVIDIA DLSS Frame Generation (nvngx_dlssg.dll).",
       },
     ],
     warning_banner:
@@ -583,6 +583,32 @@ export async function ensureDbSchema(db) {
     } catch {
       // ignore
     }
+  }
+
+  // Ensure Overwatch 2 profile includes FSR 3/4 and XeSS
+  try {
+    const owMigration = await db
+      .prepare("SELECT value FROM app_settings WHERE key = 'migration_ow2_techs_v1'")
+      .first();
+    if (!owMigration) {
+      await db
+        .prepare(
+          "UPDATE games SET supported_techs = ?1, match_names = ?2 WHERE id = 'overwatch-2'"
+        )
+        .bind(
+          JSON.stringify(["DLSS", "FSR 3/4", "XeSS"]),
+          JSON.stringify(["overwatch 2", "overwatch", "overwatch®"])
+        )
+        .run();
+      await db
+        .prepare(
+          "INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES ('migration_ow2_techs_v1', '1', ?1)"
+        )
+        .bind(new Date().toISOString())
+        .run();
+    }
+  } catch {
+    // ignore
   }
 
   globalThis.__DLSS_DB_SCHEMA_READY = true;
