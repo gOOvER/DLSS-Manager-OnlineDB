@@ -49,7 +49,7 @@
       "recommended_settings": [
         "Upscaling: DLSS (Quality or Balanced at 1440p/4K)",
         "NVIDIA DLSS Preset: Preset K (Transformer Gen 2 — sharper distant ship hulls & HUD MFD text)",
-        "Graphics Renderer: DirectX 11 or Vulkan (Beta)"
+        "Graphics Renderer: Vulkan"
       ]
     },
     {
@@ -542,4 +542,5 @@
     }
   ]
 }
+
 

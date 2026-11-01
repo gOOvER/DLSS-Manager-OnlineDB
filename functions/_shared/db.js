@@ -113,7 +113,7 @@ export const SEED_GAMES = [
     recommended_settings: [
       "Upscaling: DLSS (Quality or Balanced at 1440p/4K)",
       "NVIDIA DLSS Preset: Preset K (Transformer Gen 2 — sharper distant ship hulls & HUD MFD text)",
-      "Graphics Renderer: DirectX 11 or Vulkan (Beta)",
+      "Graphics Renderer: Vulkan",
     ],
   },
   {
@@ -547,6 +547,26 @@ export async function ensureDbSchema(db) {
         .bind(g.id, g.title, JSON.stringify(g), now, "system")
     );
     await db.batch(stmts);
+  } else {
+    // Auto-update Star Citizen Graphics Renderer recommendation to Vulkan in existing D1 row
+    try {
+      const scRow = await db
+        .prepare("SELECT payload_json FROM games WHERE id = 'starcitizen'")
+        .first();
+      if (scRow?.payload_json && scRow.payload_json.includes("DirectX 11 or Vulkan")) {
+        const updatedJson = scRow.payload_json.replace(
+          "Graphics Renderer: DirectX 11 or Vulkan (Beta)",
+          "Graphics Renderer: Vulkan"
+        );
+        await db
+          .prepare("UPDATE games SET payload_json = ?1, updated_at = ?2 WHERE id = 'starcitizen'")
+          .bind(updatedJson, new Date().toISOString())
+          .run();
+        invalidateGamesMemoryCache();
+      }
+    } catch {
+      // ignore
+    }
   }
 
   globalThis.__DLSS_DB_SCHEMA_READY = true;
