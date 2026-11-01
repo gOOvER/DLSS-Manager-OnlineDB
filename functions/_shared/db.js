@@ -117,6 +117,23 @@ export const SEED_GAMES = [
     ],
   },
   {
+    id: "global-rescue",
+    title: "Global Rescue",
+    steam_app_ids: ["2873660"],
+    match_names: ["global rescue", "gr"],
+    match_executables: ["gr.exe"],
+    anticheat_status: "safe",
+    supported_techs: ["DStorage"],
+    unsupported_techs: [],
+    warning_banner: null,
+    recommended_sr_preset: null,
+    recommended_rr_preset: null,
+    recommended_fg_preset: null,
+    recommended_settings: [
+      "DirectStorage: Active (dstorage.dll & dstoragecore.dll for fast map & tile streaming)",
+    ],
+  },
+  {
     id: "overwatch-2",
     title: "Overwatch 2",
     steam_app_ids: ["2357570"],
@@ -618,6 +635,19 @@ export async function ensureDbSchema(db) {
   } catch {
     // ignore
   }
+
+  // Ensure Global Rescue is seeded in D1
+  try {
+    const grEntry = SEED_GAMES.find((x) => x.id === "global-rescue");
+    if (grEntry) {
+      await db
+        .prepare(
+          "INSERT OR IGNORE INTO games (id, title, payload_json, updated_at, updated_by) VALUES (?1, ?2, ?3, ?4, 'system')"
+        )
+        .bind(grEntry.id, grEntry.title, JSON.stringify(grEntry), new Date().toISOString())
+        .run();
+    }
+  } catch {}
 
   globalThis.__DLSS_DB_SCHEMA_READY = true;
 }
