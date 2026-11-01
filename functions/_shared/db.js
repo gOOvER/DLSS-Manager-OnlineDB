@@ -520,6 +520,8 @@ export async function ensureDbSchema(db) {
       executable TEXT,
       detected_techs TEXT NOT NULL,
       launcher TEXT,
+      works_status TEXT NOT NULL DEFAULT 'works',
+      recommended_settings_text TEXT,
       notes TEXT,
       submitted_by_user_id INTEGER NOT NULL,
       submitted_by_username TEXT NOT NULL,
@@ -533,7 +535,13 @@ export async function ensureDbSchema(db) {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`),
   ]);
 
-  // Auto-migrate existing users table if discord_id / discord_avatar columns do not exist yet
+  // Auto-migrate existing users & game_submissions tables
+  try {
+    await db.prepare("ALTER TABLE game_submissions ADD COLUMN works_status TEXT NOT NULL DEFAULT 'works'").run();
+  } catch {}
+  try {
+    await db.prepare("ALTER TABLE game_submissions ADD COLUMN recommended_settings_text TEXT").run();
+  } catch {}
   try {
     await db.prepare("ALTER TABLE users ADD COLUMN discord_id TEXT").run();
   } catch {

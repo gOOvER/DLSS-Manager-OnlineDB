@@ -29,8 +29,22 @@ function extractApiKey(request) {
   return "";
 }
 
+function parseSettingsList(raw) {
+  if (Array.isArray(raw)) {
+    return raw.map((s) => String(s || "").trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return raw
+      .split(/\r?\n|;/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 // POST /api/v1/games/report
 // Allows any user with a valid personal API key (or active session) to report/submit scanned or manual games to D1.
+// Manual reports require `works_status` ("works" = Geht, "broken" = Geht nicht); all other fields are optional.
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -77,9 +91,10 @@ export async function onRequestPost(context) {
     }
 
     const source = String(body.source || "manual").slice(0, 32);
+    const isManualReport = source === "manual" || source === "user_report";
     const now = new Date().toISOString();
 
-    // Load existing official game IDs & match names to avoid duplicates
+    // Load existing official game IDs & match names to avoid duplicates on auto_scan
     const { results: officialRows } = await db
       .prepare("SELECT id, title, payload_json FROM games")
       .all();
@@ -101,47 +116,76 @@ export async function onRequestPost(context) {
       }
     }
 
+    // Load existing submissions into a Map in 1 query (saves D1 reads & writes on Free Tier!)
+    const { results: subRows } = await db
+      .prepare("SELECT id, reports_count, payload_json FROM game_submissions")
+      .all();
+    const existingSubMap = new Map();
+    for (const s of subRows || []) {
+      existingSubMap.set(String(s.id).toLowerCase(), s);
+    }
+
     let addedReports = 0;
     let updatedExisting = 0;
-    let autoPublished = 0;
 
     for (const item of rawGames.slice(0, 100)) {
       const title = String(item.title || item.name || "").trim();
       if (!title || title.length < 2) continue;
 
-      const id = slugifyGameId(item.id, title);
+      // Mandatory field for manual user reports: works_status ("works" or "broken")
+      const rawStatus = String(item.works_status || "").trim().toLowerCase();
+      if (isManualReport && !["works", "broken"].includes(rawStatus)) {
+        return jsonResponse(
+          {
+            error:
+              "Pflichtfeld fehlt: Bitte gib an, ob das Spiel geht (✅ Geht) oder nicht geht (❌ Geht nicht).",
+          },
+          400
+        );
+      }
+      const worksStatus = rawStatus === "broken" ? "broken" : "works";
+
+      const baseId = slugifyGameId(item.id, title);
       const appIds = Array.isArray(item.steam_app_ids)
         ? item.steam_app_ids.map(String).filter(Boolean)
         : item.app_id
-        ? [String(item.app_id)]
+        ? [String(item.app_id).trim()].filter(Boolean)
         : [];
       const exes = Array.isArray(item.match_executables)
-        ? item.match_executables.map((x) => String(x).toLowerCase()).filter(Boolean)
+        ? item.match_executables.map((x) => String(x).toLowerCase().trim()).filter(Boolean)
         : item.executable
-        ? [String(item.executable).toLowerCase()]
+        ? [String(item.executable).toLowerCase().trim()].filter(Boolean)
         : [];
       const techs = Array.isArray(item.supported_techs)
         ? item.supported_techs.map(String).filter(Boolean)
         : [];
       const launcher = String(item.launcher || "").trim();
       const notes = String(item.notes || "").trim();
-      const anticheatStatus = [
-        "safe",
-        "signed_only",
-        "driver_override_only",
-        "blocked",
-      ].includes(item.anticheat_status)
-        ? item.anticheat_status
-        : "safe";
+      const userSettings = parseSettingsList(item.recommended_settings);
+      const srPreset = item.recommended_sr_preset ? String(item.recommended_sr_preset).trim() : null;
+      const rrPreset = item.recommended_rr_preset ? String(item.recommended_rr_preset).trim() : null;
+      const fgPreset = item.recommended_fg_preset ? String(item.recommended_fg_preset).trim() : null;
 
-      // Check if already in official games DB
       const existingOfficial =
-        officialMap.get(id) ||
+        officialMap.get(baseId) ||
         officialMap.get(title.toLowerCase()) ||
         (appIds[0] ? officialMap.get(`appid:${appIds[0].toLowerCase()}`) : null);
 
-      if (existingOfficial) {
-        // Merge newly discovered techs or steam_app_ids into existing official game if missing
+      const defaultAnticheat =
+        worksStatus === "broken"
+          ? "blocked"
+          : [
+              "safe",
+              "signed_only",
+              "driver_override_only",
+              "blocked",
+            ].includes(item.anticheat_status)
+          ? item.anticheat_status
+          : existingOfficial?.anticheat_status || "safe";
+
+      // If this is an automatic background scan ("auto_scan"), only report truly new games or missing techs
+      // so we never waste Cloudflare D1 Free Tier writes!
+      if (!isManualReport && existingOfficial) {
         let changed = false;
         const mergedTechs = new Set(existingOfficial.supported_techs || []);
         for (const t of techs) {
@@ -169,46 +213,81 @@ export async function onRequestPost(context) {
         continue;
       }
 
+      // Skip auto_scan if already in game_submissions (zero D1 write cost for repeated scans!)
+      if (!isManualReport && existingSubMap.has(baseId)) {
+        continue;
+      }
+
+      const targetGameId = existingOfficial ? existingOfficial.id : baseId;
+      const resolvedTechs =
+        techs.length > 0
+          ? techs
+          : existingOfficial?.supported_techs?.length
+          ? existingOfficial.supported_techs
+          : ["DLSS"];
+      const resolvedSettings =
+        userSettings.length > 0
+          ? userSettings
+          : existingOfficial?.recommended_settings?.length
+          ? existingOfficial.recommended_settings
+          : resolvedTechs.includes("DLSS") && worksStatus === "works"
+          ? ["Upscaling: NVIDIA DLSS Quality (Preset K)"]
+          : [];
+
       const candidateProfile = {
-        id,
-        title,
-        steam_app_ids: appIds,
-        match_names: [title.toLowerCase()],
-        match_executables: exes,
-        anticheat_status: anticheatStatus,
-        supported_techs: techs.length > 0 ? techs : ["DLSS"],
-        unsupported_techs: [],
-        warning_banner: notes || null,
-        recommended_sr_preset: techs.includes("DLSS") ? "Preset K" : null,
-        recommended_rr_preset: techs.includes("DLSS-RR") ? "Preset F" : null,
-        recommended_fg_preset: techs.includes("DLSS-G") ? "Latest" : null,
-        recommended_settings: [
-          ...(techs.includes("DLSS")
-            ? ["Upscaling: NVIDIA DLSS Quality (Preset K)"]
-            : []),
-        ],
+        id: targetGameId,
+        title: existingOfficial?.title || title,
+        steam_app_ids:
+          appIds.length > 0 ? appIds : existingOfficial?.steam_app_ids || [],
+        match_names: Array.from(
+          new Set([
+            ...(existingOfficial?.match_names || []),
+            title.toLowerCase(),
+          ])
+        ),
+        match_executables:
+          exes.length > 0 ? exes : existingOfficial?.match_executables || [],
+        anticheat_status: defaultAnticheat,
+        works_status: worksStatus,
+        supported_techs: resolvedTechs,
+        unsupported_techs: existingOfficial?.unsupported_techs || [],
+        warning_banner:
+          notes ||
+          (worksStatus === "broken"
+            ? `Community-Meldung (${user.username}): Funktioniert aktuell nicht / Probleme beim DLL-Tausch.`
+            : existingOfficial?.warning_banner || null),
+        recommended_sr_preset:
+          srPreset ||
+          existingOfficial?.recommended_sr_preset ||
+          (resolvedTechs.includes("DLSS") && worksStatus === "works" ? "Preset K" : null),
+        recommended_rr_preset:
+          rrPreset ||
+          existingOfficial?.recommended_rr_preset ||
+          (resolvedTechs.includes("DLSS-RR") && worksStatus === "works" ? "Preset F" : null),
+        recommended_fg_preset:
+          fgPreset ||
+          existingOfficial?.recommended_fg_preset ||
+          (resolvedTechs.includes("DLSS-G") && worksStatus === "works" ? "Latest" : null),
+        recommended_settings: resolvedSettings,
         launcher,
         source,
       };
 
-      // Upsert into game_submissions table so Admin can review, or auto-publish if submitted by Admin
-      const existingSub = await db
-        .prepare("SELECT id, reports_count, payload_json FROM game_submissions WHERE id = ?1")
-        .bind(id)
-        .first();
+      const settingsText = userSettings.join(" | ");
+      const existingSub = existingSubMap.get(targetGameId);
 
       if (existingSub) {
         let mergedPayload = candidateProfile;
         try {
           const prev = JSON.parse(existingSub.payload_json);
           mergedPayload.supported_techs = Array.from(
-            new Set([...(prev.supported_techs || []), ...techs])
+            new Set([...(prev.supported_techs || []), ...resolvedTechs])
           );
           mergedPayload.steam_app_ids = Array.from(
-            new Set([...(prev.steam_app_ids || []), ...appIds])
+            new Set([...(prev.steam_app_ids || []), ...candidateProfile.steam_app_ids])
           );
           mergedPayload.match_executables = Array.from(
-            new Set([...(prev.match_executables || []), ...exes])
+            new Set([...(prev.match_executables || []), ...candidateProfile.match_executables])
           );
         } catch {}
 
@@ -217,15 +296,25 @@ export async function onRequestPost(context) {
             `UPDATE game_submissions
              SET reports_count = reports_count + 1,
                  detected_techs = ?1,
-                 payload_json = ?2,
-                 updated_at = ?3
-             WHERE id = ?4`
+                 works_status = ?2,
+                 recommended_settings_text = COALESCE(NULLIF(?3, ''), recommended_settings_text),
+                 notes = COALESCE(NULLIF(?4, ''), notes),
+                 submitted_by_user_id = ?5,
+                 submitted_by_username = ?6,
+                 payload_json = ?7,
+                 updated_at = ?8
+             WHERE id = ?9`
           )
           .bind(
             mergedPayload.supported_techs.join(", "),
+            worksStatus,
+            settingsText,
+            notes,
+            user.id,
+            user.username,
             JSON.stringify(mergedPayload),
             now,
-            id
+            targetGameId
           )
           .run();
         addedReports++;
@@ -234,17 +323,20 @@ export async function onRequestPost(context) {
           .prepare(
             `INSERT INTO game_submissions (
                id, title, steam_app_id, executable, detected_techs, launcher,
-               notes, submitted_by_user_id, submitted_by_username, reports_count,
+               works_status, recommended_settings_text, notes,
+               submitted_by_user_id, submitted_by_username, reports_count,
                status, payload_json, created_at, updated_at
-             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 1, 'pending', ?10, ?11, ?12)`
+             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, 1, 'pending', ?12, ?13, ?14)`
           )
           .bind(
-            id,
-            title,
-            appIds.join(", "),
-            exes.join(", "),
+            targetGameId,
+            candidateProfile.title,
+            candidateProfile.steam_app_ids.join(", "),
+            candidateProfile.match_executables.join(", "),
             candidateProfile.supported_techs.join(", "),
             launcher,
+            worksStatus,
+            settingsText,
             notes,
             user.id,
             user.username,
@@ -253,16 +345,23 @@ export async function onRequestPost(context) {
             now
           )
           .run();
+        existingSubMap.set(targetGameId, {
+          id: targetGameId,
+          reports_count: 1,
+          payload_json: JSON.stringify(candidateProfile),
+        });
         addedReports++;
       }
     }
 
-    if (updatedExisting > 0 || autoPublished > 0) {
+    if (updatedExisting > 0) {
       invalidateGamesMemoryCache();
     }
 
     return jsonResponse({
-      message: `${addedReports} neue(s) Spiel(e) gemeldet, ${updatedExisting} bestehende(s) Profil(e) ergänzt.`,
+      message: isManualReport
+        ? `✓ Deine Meldung wurde erfolgreich an die Datenbank gesendet!`
+        : `${addedReports} neue(s) Spiel(e) gemeldet, ${updatedExisting} bestehende(s) Profil(e) ergänzt.`,
       reported_count: addedReports,
       updated_existing_count: updatedExisting,
       submitted_by: user.username,

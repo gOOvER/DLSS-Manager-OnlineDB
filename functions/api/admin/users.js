@@ -31,18 +31,59 @@ export async function onRequestGet(context) {
       .all();
 
     const gamesCountRow = await db.prepare("SELECT COUNT(*) as cnt FROM games").first();
+    const subsCountRow = await db.prepare("SELECT COUNT(*) as cnt FROM game_submissions").first();
+    const sessionsCountRow = await db.prepare("SELECT COUNT(*) as cnt FROM sessions").first();
     const totalRequests = (users || []).reduce(
       (sum, u) => sum + Number(u.api_requests_count || 0),
       0
     );
     const discordCreds = await getDiscordCredentials(context.env, db);
 
+    const totalGames = Number(gamesCountRow?.cnt || 0);
+    const totalSubs = Number(subsCountRow?.cnt || 0);
+    const totalSessions = Number(sessionsCountRow?.cnt || 0);
+    const totalUsers = (users || []).length;
+    const totalDbRows = totalUsers + totalGames + totalSubs + totalSessions;
+
+    // Count users who made API requests in the last 24h
+    const dayAgo = new Date(Date.now() - 86400 * 1000).toISOString();
+    const activeTodayUsers = (users || []).filter(
+      (u) => u.last_api_access && String(u.last_api_access) >= dayAgo
+    ).length;
+
+    // Estimate daily worker requests & D1 reads/writes vs Cloudflare Free Tier limits
+    // Free Tier limits: 100,000 Worker req/day, 5,000,000 D1 rows read/day, 100,000 D1 rows written/day, 5,000 MB storage
+    const estDailyRequests = Math.max(activeTodayUsers * 12, Math.min(totalRequests, 100000));
+    const estDailyReads = estDailyRequests * 3; // thanks to 60s in-memory edge cache
+    const estDailyWrites = activeTodayUsers * 4 + totalSubs * 2;
+    const estStorageMb = Number(((totalDbRows * 2.5) / 1024).toFixed(2));
+
+    const maxUsagePct = Math.max(
+      (estDailyRequests / 100000) * 100,
+      (estDailyReads / 5000000) * 100,
+      (estDailyWrites / 100000) * 100,
+      (estStorageMb / 5000) * 100
+    );
+
     return jsonResponse({
       stats: {
-        total_users: (users || []).length,
+        total_users: totalUsers,
         active_keys: (users || []).filter((u) => u.api_key && Number(u.is_active) === 1).length,
         total_api_requests: totalRequests,
-        total_games: Number(gamesCountRow?.cnt || 0),
+        total_games: totalGames,
+      },
+      cloudflare_free_tier: {
+        total_db_rows: totalDbRows,
+        est_storage_mb: estStorageMb,
+        storage_limit_mb: 5000,
+        est_daily_requests: estDailyRequests,
+        daily_requests_limit: 100000,
+        est_daily_reads: estDailyReads,
+        daily_reads_limit: 5000000,
+        est_daily_writes: estDailyWrites,
+        daily_writes_limit: 100000,
+        usage_percent: Number(maxUsagePct.toFixed(2)),
+        dokploy_recommended: maxUsagePct >= 70,
       },
       discord_config: {
         client_id: discordCreds.clientId || "",

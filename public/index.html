@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dlssdb.goover.dev — DLSS Manager Online Database, API Keys &amp; Admin</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <style>
       :root {
         --bg: #0b0e14;
@@ -458,7 +459,8 @@
       <header>
         <div>
           <h1>
-            <span>☁️ dlssdb.goover.dev</span>
+            <img src="/favicon.png" alt="DM" style="width:34px;height:34px;border-radius:8px;vertical-align:middle" />
+            <span>dlssdb.goover.dev</span>
             <span class="badge" id="profile-count-badge">16 Profiles</span>
             <span class="badge badge-blue" id="backend-mode-badge">Cloudflare D1 Edge SQLite</span>
           </h1>
@@ -683,34 +685,78 @@
 
           <!-- User Game Submission Card -->
           <div class="panel">
-            <h3 style="margin-bottom:4px" data-i18n="user_report_title">📤 Fehlendes Spiel an die Datenbank melden</h3>
+            <h3 style="margin-bottom:4px" data-i18n="user_report_title">📤 Spiel &amp; Kompatibilität an die Datenbank melden</h3>
             <p style="color:var(--muted);font-size:0.82rem;margin-bottom:14px" data-i18n="user_report_sub">
-              Du kannst fehlende Spiele entweder automatisch über die <strong>DLSS Manager</strong> Desktop-App senden lassen oder hier direkt einreichen:
+              Melde ein Spiel direkt hier oder über die <strong>DLSS Manager</strong> App. <strong>Pflichtangabe:</strong> Spieletitel + ob es <strong>geht oder nicht geht</strong>. Alle weiteren Angaben (Einstellungen, Presets, Notizen) sind komplett optional!
             </p>
-            <div class="two-col" style="gap:12px">
+
+            <div class="two-col" style="gap:14px;align-items:start">
               <div class="form-group" style="margin-bottom:0">
-                <label>Spieletitel *</label>
-                <input type="text" id="rep-title" class="input" placeholder="z.B. Kingdom Come: Deliverance II" />
+                <label>Spieletitel <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
+                <input type="text" id="rep-title" class="input" placeholder="z.B. Star Citizen, Overwatch 2, Kingdom Come II..." />
               </div>
+
               <div class="form-group" style="margin-bottom:0">
-                <label>Steam App ID / Launcher ID (optional)</label>
-                <input type="text" id="rep-appid" class="input" placeholder="z.B. 1771300" />
-              </div>
-              <div class="form-group" style="margin-bottom:0">
-                <label>Executable (optional)</label>
-                <input type="text" id="rep-exe" class="input" placeholder="z.B. KingdomCome.exe" />
-              </div>
-              <div class="form-group" style="margin-bottom:0">
-                <label>Unterstützte Technologien (Komma-getrennt)</label>
-                <input type="text" id="rep-techs" class="input" value="DLSS, DLSS-G" placeholder="DLSS, DLSS-G, DLSS-RR, FSR 3/4, XeSS" />
+                <label>Funktioniert DLSS / Upscaler-Update? <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
+                <input type="hidden" id="rep-works-status" value="works" />
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <button
+                    type="button"
+                    id="rep-btn-works"
+                    class="btn"
+                    onclick="setWebReportWorksStatus('works')"
+                    style="justify-content:center;border-color:rgba(118,185,0,0.65);background:rgba(118,185,0,0.18);color:#d9f99d;font-weight:700"
+                  >
+                    ✅ Geht (Funktioniert)
+                  </button>
+                  <button
+                    type="button"
+                    id="rep-btn-broken"
+                    class="btn"
+                    onclick="setWebReportWorksStatus('broken')"
+                    style="justify-content:center;opacity:0.7"
+                  >
+                    ❌ Geht nicht (Probleme)
+                  </button>
+                </div>
               </div>
             </div>
+
+            <div class="two-col" style="gap:12px;margin-top:12px">
+              <div class="form-group" style="margin-bottom:0">
+                <label>Empfohlene In-Game Einstellungen <span style="color:var(--muted)">(Optional)</span></label>
+                <input type="text" id="rep-settings" class="input" placeholder="z.B. Graphics Renderer: Vulkan; Upscaling: DLSS Quality" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Empfohlenes DLSS Preset <span style="color:var(--muted)">(Optional)</span></label>
+                <select id="rep-preset" class="select">
+                  <option value="">— Keine Angabe (Optional) —</option>
+                  <option value="Preset K">Preset K (DLSS 4.5 Transformer Gen 2)</option>
+                  <option value="Preset J">Preset J (DLSS 4.5 Transformer)</option>
+                  <option value="Latest">Latest (Driver Default)</option>
+                  <option value="Preset E">Preset E (CNN)</option>
+                  <option value="Preset C">Preset C</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Unterstützte Technologien <span style="color:var(--muted)">(Optional, Komma-getrennt)</span></label>
+                <input type="text" id="rep-techs" class="input" placeholder="z.B. DLSS, DLSS-G, FSR 3/4, XeSS" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Steam App ID &amp; Executable <span style="color:var(--muted)">(Optional)</span></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <input type="text" id="rep-appid" class="input" placeholder="AppID (z.B. 2357570)" />
+                  <input type="text" id="rep-exe" class="input" placeholder="EXE (z.B. game.exe)" />
+                </div>
+              </div>
+            </div>
+
             <div style="display:flex;gap:12px;align-items:end;margin-top:12px;flex-wrap:wrap">
               <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0">
-                <label>Hinweis / Anti-Cheat Info (optional)</label>
-                <input type="text" id="rep-notes" class="input" placeholder="z.B. Läuft problemlos mit Preset K..." />
+                <label>Hinweise / Fehlerbeschreibung / Anti-Cheat Info <span style="color:var(--muted)">(Optional)</span></label>
+                <input type="text" id="rep-notes" class="input" placeholder="Optional: z.B. Warum geht es nicht, oder worauf muss man achten?" />
               </div>
-              <button class="btn btn-primary" onclick="submitUserGameReport()">📤 Spiel an Datenbank senden</button>
+              <button class="btn btn-primary" onclick="submitUserGameReport()">📤 Meldung absenden</button>
             </div>
           </div>
         </div>
@@ -734,6 +780,39 @@
           <div class="stat-box">
             <div class="stat-label" data-i18n="adm_stat_games">Spiele-Profile in DB</div>
             <div class="stat-val" id="adm-stat-games">0</div>
+          </div>
+        </div>
+
+        <!-- Cloudflare Free-Tier Quota & Dokploy Migration Monitor -->
+        <div class="panel" id="adm-cf-quota-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px">
+            <div>
+              <h3 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span>☁️ Cloudflare Free-Tier &amp; Dokploy Monitor</span>
+                <span class="badge" id="adm-cf-status-badge">🟢 Free-Tier Sicher (&lt; 1%)</span>
+              </h3>
+              <p style="color:var(--muted);font-size:0.81rem">
+                Überwacht deine täglichen Cloudflare Workers &amp; D1 Limits. Sobald sich ein Wert <strong>70%</strong> nähert, schlägt dieses Panel automatisch Alarm für den Wechsel auf deine <strong>Dokploy</strong>-Instanz.
+              </p>
+            </div>
+          </div>
+          <div class="stats-row" style="margin-bottom:0;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+            <div class="stat-box" style="padding:10px 14px">
+              <div class="stat-label">Worker API Requests / Tag</div>
+              <div style="font-weight:700;font-size:0.95rem;margin-top:4px" id="adm-cf-req-val">0 / 100.000</div>
+            </div>
+            <div class="stat-box" style="padding:10px 14px">
+              <div class="stat-label">D1 Rows Read / Tag (60s Cache)</div>
+              <div style="font-weight:700;font-size:0.95rem;margin-top:4px" id="adm-cf-reads-val">0 / 5.000.000</div>
+            </div>
+            <div class="stat-box" style="padding:10px 14px">
+              <div class="stat-label">D1 Rows Written / Tag</div>
+              <div style="font-weight:700;font-size:0.95rem;margin-top:4px" id="adm-cf-writes-val">0 / 100.000</div>
+            </div>
+            <div class="stat-box" style="padding:10px 14px">
+              <div class="stat-label">D1 Datenbank-Größe</div>
+              <div style="font-weight:700;font-size:0.95rem;margin-top:4px" id="adm-cf-storage-val">0.05 MB / 5.000 MB</div>
+            </div>
           </div>
         </div>
 
@@ -814,9 +893,10 @@
             <table>
               <thead>
                 <tr>
-                  <th style="min-width:210px">Gemeldetes Spiel / ID &amp; EXE</th>
-                  <th style="min-width:220px">Erkannte Techs</th>
-                  <th style="min-width:150px">Gemeldet von</th>
+                  <th style="min-width:200px">Gemeldetes Spiel / ID &amp; EXE</th>
+                  <th style="min-width:130px">Status (Muss)</th>
+                  <th style="min-width:190px">Techs &amp; Optionale Settings</th>
+                  <th style="min-width:140px">Gemeldet von</th>
                   <th style="min-width:160px">Hinweise / Launcher</th>
                   <th style="text-align:right;min-width:210px">Aktionen</th>
                 </tr>
@@ -1737,6 +1817,31 @@
             }
           }
 
+          // Render Cloudflare Free-Tier & Dokploy Monitor
+          if (data.cloudflare_free_tier) {
+            const cf = data.cloudflare_free_tier;
+            const fmt = (n) => Number(n || 0).toLocaleString("de-DE");
+            const reqEl = document.getElementById("adm-cf-req-val");
+            const readsEl = document.getElementById("adm-cf-reads-val");
+            const writesEl = document.getElementById("adm-cf-writes-val");
+            const storageEl = document.getElementById("adm-cf-storage-val");
+            const badgeEl = document.getElementById("adm-cf-status-badge");
+            if (reqEl) reqEl.textContent = `~${fmt(cf.est_daily_requests)} / ${fmt(cf.daily_requests_limit)}`;
+            if (readsEl) readsEl.textContent = `~${fmt(cf.est_daily_reads)} / ${fmt(cf.daily_reads_limit)}`;
+            if (writesEl) writesEl.textContent = `~${fmt(cf.est_daily_writes)} / ${fmt(cf.daily_writes_limit)}`;
+            if (storageEl) storageEl.textContent = `${cf.est_storage_mb} MB / ${fmt(cf.storage_limit_mb)} MB (${cf.total_db_rows} Zeilen)`;
+            if (badgeEl) {
+              if (cf.dokploy_recommended) {
+                badgeEl.textContent = `🔴 Auslastung ${cf.usage_percent}% — Wechsel auf Dokploy empfohlen!`;
+                badgeEl.style.background = "rgba(239,68,68,0.2)";
+                badgeEl.style.color = "#fca5a5";
+                badgeEl.style.borderColor = "rgba(239,68,68,0.5)";
+              } else {
+                badgeEl.textContent = `🟢 Free-Tier Sicher (${cf.usage_percent}% Auslastung)`;
+              }
+            }
+          }
+
           renderAdminUsersTable();
           try {
             const gData = await apiRequest("/api/admin/games", "GET");
@@ -1750,12 +1855,43 @@
         }
       }
 
+      function setWebReportWorksStatus(status) {
+        const val = status === "broken" ? "broken" : "works";
+        document.getElementById("rep-works-status").value = val;
+        const btnWorks = document.getElementById("rep-btn-works");
+        const btnBroken = document.getElementById("rep-btn-broken");
+        if (val === "works") {
+          btnWorks.style.borderColor = "rgba(118,185,0,0.65)";
+          btnWorks.style.background = "rgba(118,185,0,0.18)";
+          btnWorks.style.color = "#d9f99d";
+          btnWorks.style.fontWeight = "700";
+          btnWorks.style.opacity = "1";
+          btnBroken.style.borderColor = "var(--border)";
+          btnBroken.style.background = "#161d29";
+          btnBroken.style.color = "var(--text)";
+          btnBroken.style.fontWeight = "600";
+          btnBroken.style.opacity = "0.7";
+        } else {
+          btnBroken.style.borderColor = "rgba(239,68,68,0.65)";
+          btnBroken.style.background = "rgba(239,68,68,0.18)";
+          btnBroken.style.color = "#fca5a5";
+          btnBroken.style.fontWeight = "700";
+          btnBroken.style.opacity = "1";
+          btnWorks.style.borderColor = "var(--border)";
+          btnWorks.style.background = "#161d29";
+          btnWorks.style.color = "var(--text)";
+          btnWorks.style.fontWeight = "600";
+          btnWorks.style.opacity = "0.7";
+        }
+      }
+
       async function submitUserGameReport() {
         const title = document.getElementById("rep-title").value.trim();
         if (!title) {
-          showToast("Bitte einen Spieletitel eingeben.", true);
+          showToast("Bitte einen Spieletitel eingeben (Pflichtfeld).", true);
           return;
         }
+        const works_status = document.getElementById("rep-works-status").value || "works";
         const app_id = document.getElementById("rep-appid").value.trim();
         const executable = document.getElementById("rep-exe").value.trim();
         const supported_techs = document
@@ -1763,23 +1899,31 @@
           .value.split(",")
           .map((s) => s.trim())
           .filter(Boolean);
+        const recommended_settings = document.getElementById("rep-settings")?.value.trim() || "";
+        const recommended_sr_preset = document.getElementById("rep-preset")?.value || "";
         const notes = document.getElementById("rep-notes").value.trim();
 
         try {
           const res = await apiRequest("/api/v1/games/report", "POST", {
-            source: "web_portal",
+            source: "user_report",
             game: {
               title,
+              works_status,
               app_id,
               executable,
               supported_techs,
+              recommended_settings,
+              recommended_sr_preset: recommended_sr_preset || null,
               notes,
             },
           });
           document.getElementById("rep-title").value = "";
           document.getElementById("rep-appid").value = "";
           document.getElementById("rep-exe").value = "";
+          if (document.getElementById("rep-settings")) document.getElementById("rep-settings").value = "";
+          if (document.getElementById("rep-preset")) document.getElementById("rep-preset").value = "";
           document.getElementById("rep-notes").value = "";
+          setWebReportWorksStatus("works");
           showToast(res.message || "✓ Spiel erfolgreich gemeldet!");
           if (currentUser?.role === "admin") loadAdminDashboard();
         } catch (e) {
@@ -1796,7 +1940,7 @@
         if (!tbody) return;
 
         if (adminSubmissionsList.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Keine offenen Spiele-Meldungen vorhanden.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px">Keine offenen Spiele-Meldungen vorhanden.</td></tr>`;
           return;
         }
 
@@ -1806,6 +1950,10 @@
               .split(",")
               .map((s) => s.trim())
               .filter(Boolean);
+            const isBroken = sub.works_status === "broken";
+            const statusHtml = isBroken
+              ? `<span class="ac-pill ac-blocked">❌ Geht nicht</span>`
+              : `<span class="ac-pill ac-safe">✅ Geht</span>`;
             return `
           <tr>
             <td>
@@ -1816,17 +1964,23 @@
             }
               </div>
             </td>
+            <td style="white-space:nowrap">${statusHtml}</td>
             <td>
               <div class="tech-chips">
                 ${techs.map((tk) => `<span class="tech-chip">${esc(tk)}</span>`).join("")}
               </div>
+              ${
+                sub.recommended_settings_text
+                  ? `<div style="font-size:0.74rem;color:#bef264;margin-top:4px">⚙️ ${esc(sub.recommended_settings_text)}</div>`
+                  : ""
+              }
             </td>
             <td style="white-space:nowrap">
               <strong>${esc(sub.submitted_by_username)}</strong>
               <div style="color:var(--muted);font-size:0.74rem">${sub.reports_count || 1}x gemeldet</div>
             </td>
             <td>
-              <div style="font-size:0.78rem;color:#cbd5e1">${esc(sub.launcher || "Desktop Scan")}</div>
+              <div style="font-size:0.78rem;color:#cbd5e1">${esc(sub.launcher || "Manuelle Meldung")}</div>
               ${
                 sub.notes
                   ? `<div style="font-size:0.74rem;color:var(--muted)">${esc(sub.notes)}</div>`

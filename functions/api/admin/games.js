@@ -39,7 +39,7 @@ export async function onRequestGet(context) {
 
     const { results: subRows } = await db
       .prepare(
-        "SELECT id, title, steam_app_id, executable, detected_techs, launcher, notes, submitted_by_username, reports_count, status, payload_json, created_at, updated_at FROM game_submissions ORDER BY updated_at DESC"
+        "SELECT id, title, steam_app_id, executable, detected_techs, launcher, works_status, recommended_settings_text, notes, submitted_by_username, reports_count, status, payload_json, created_at, updated_at FROM game_submissions ORDER BY updated_at DESC"
       )
       .all();
 
