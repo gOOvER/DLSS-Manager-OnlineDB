@@ -2037,8 +2037,9 @@
           if (authError === "DISCORD_NOT_CONFIGURED") {
             const detailsEl = document.getElementById("discord-setup-details");
             if (detailsEl) detailsEl.open = true;
+            window.__OPEN_ADMIN_DISCORD_CONFIG = true;
             showToast(
-              "⚙️ Bitte zuerst DISCORD_CLIENT_ID & DISCORD_CLIENT_SECRET in Cloudflare hinterlegen (siehe Anleitung unten).",
+              "⚙️ Bitte im Reiter '🛡️ Admin-Bereich' oben deine Discord Client ID & Client Secret eintragen und auf '💾 In D1 speichern' klicken!",
               true
             );
           } else {
@@ -2063,6 +2064,12 @@
             currentUser = me.user;
             if (discordToken && currentUser) {
               showToast(`✓ Discord Login erfolgreich: ${currentUser.username}`);
+            }
+            if (window.__OPEN_ADMIN_DISCORD_CONFIG && currentUser?.role === "admin") {
+              switchTab("admin");
+              setTimeout(() => {
+                document.getElementById("adm-discord-client-id")?.focus();
+              }, 300);
             }
           } catch {
             authToken = null;
