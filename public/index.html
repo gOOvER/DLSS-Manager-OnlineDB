@@ -680,6 +680,39 @@
               </div>
             </div>
           </div>
+
+          <!-- User Game Submission Card -->
+          <div class="panel">
+            <h3 style="margin-bottom:4px" data-i18n="user_report_title">📤 Fehlendes Spiel an die Datenbank melden</h3>
+            <p style="color:var(--muted);font-size:0.82rem;margin-bottom:14px" data-i18n="user_report_sub">
+              Du kannst fehlende Spiele entweder automatisch über die <strong>DLSS Manager</strong> Desktop-App senden lassen oder hier direkt einreichen:
+            </p>
+            <div class="two-col" style="gap:12px">
+              <div class="form-group" style="margin-bottom:0">
+                <label>Spieletitel *</label>
+                <input type="text" id="rep-title" class="input" placeholder="z.B. Kingdom Come: Deliverance II" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Steam App ID / Launcher ID (optional)</label>
+                <input type="text" id="rep-appid" class="input" placeholder="z.B. 1771300" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Executable (optional)</label>
+                <input type="text" id="rep-exe" class="input" placeholder="z.B. KingdomCome.exe" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Unterstützte Technologien (Komma-getrennt)</label>
+                <input type="text" id="rep-techs" class="input" value="DLSS, DLSS-G" placeholder="DLSS, DLSS-G, DLSS-RR, FSR 3/4, XeSS" />
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:end;margin-top:12px;flex-wrap:wrap">
+              <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0">
+                <label>Hinweis / Anti-Cheat Info (optional)</label>
+                <input type="text" id="rep-notes" class="input" placeholder="z.B. Läuft problemlos mit Preset K..." />
+              </div>
+              <button class="btn btn-primary" onclick="submitUserGameReport()">📤 Spiel an Datenbank senden</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -760,6 +793,35 @@
                 </tr>
               </thead>
               <tbody id="admin-users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Community / Auto-Scan Game Submissions -->
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+            <div>
+              <h3 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span>📥 Gemeldete Spiele (Community &amp; Auto-Scan)</span>
+                <span class="badge badge-blue" id="adm-submissions-badge">0 Ausstehend</span>
+              </h3>
+              <p style="color:var(--muted);font-size:0.82rem">
+                Spiele, die von Nutzern über ihren API Key aus <strong>DLSS Manager</strong> automatisch oder manuell gemeldet wurden. Mit 1 Klick prüfen oder direkt in die Live-DB übernehmen.
+              </p>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th style="min-width:210px">Gemeldetes Spiel / ID &amp; EXE</th>
+                  <th style="min-width:220px">Erkannte Techs</th>
+                  <th style="min-width:150px">Gemeldet von</th>
+                  <th style="min-width:160px">Hinweise / Launcher</th>
+                  <th style="text-align:right;min-width:210px">Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="admin-submissions-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -910,6 +972,7 @@
       let currentUser = null;
       let revealMyKey = false;
       let adminUsersList = [];
+      let adminSubmissionsList = [];
       let currentLang =
         localStorage.getItem("dlssdb_lang") ||
         (navigator.language?.toLowerCase().startsWith("de") ? "de" : "en");
@@ -1675,7 +1738,160 @@
           }
 
           renderAdminUsersTable();
+          try {
+            const gData = await apiRequest("/api/admin/games", "GET");
+            if (Array.isArray(gData.games)) allGames = gData.games;
+            adminSubmissionsList = gData.submissions || [];
+          } catch {}
+          renderAdminSubmissionsTable();
           renderAdminGamesTable();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function submitUserGameReport() {
+        const title = document.getElementById("rep-title").value.trim();
+        if (!title) {
+          showToast("Bitte einen Spieletitel eingeben.", true);
+          return;
+        }
+        const app_id = document.getElementById("rep-appid").value.trim();
+        const executable = document.getElementById("rep-exe").value.trim();
+        const supported_techs = document
+          .getElementById("rep-techs")
+          .value.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const notes = document.getElementById("rep-notes").value.trim();
+
+        try {
+          const res = await apiRequest("/api/v1/games/report", "POST", {
+            source: "web_portal",
+            game: {
+              title,
+              app_id,
+              executable,
+              supported_techs,
+              notes,
+            },
+          });
+          document.getElementById("rep-title").value = "";
+          document.getElementById("rep-appid").value = "";
+          document.getElementById("rep-exe").value = "";
+          document.getElementById("rep-notes").value = "";
+          showToast(res.message || "✓ Spiel erfolgreich gemeldet!");
+          if (currentUser?.role === "admin") loadAdminDashboard();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function renderAdminSubmissionsTable() {
+        const tbody = document.getElementById("admin-submissions-tbody");
+        const badge = document.getElementById("adm-submissions-badge");
+        if (badge) {
+          badge.textContent = `${adminSubmissionsList.length} Ausstehend`;
+        }
+        if (!tbody) return;
+
+        if (adminSubmissionsList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Keine offenen Spiele-Meldungen vorhanden.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = adminSubmissionsList
+          .map((sub) => {
+            const techs = String(sub.detected_techs || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+            return `
+          <tr>
+            <td>
+              <div style="font-weight:700;font-size:0.92rem">${esc(sub.title)}</div>
+              <div style="font-family:Consolas,monospace;font-size:0.74rem;color:var(--muted);margin-top:2px">
+                ${esc(sub.id)}${sub.steam_app_id ? ` · AppID: ${esc(sub.steam_app_id)}` : ""}${
+              sub.executable ? ` · ${esc(sub.executable)}` : ""
+            }
+              </div>
+            </td>
+            <td>
+              <div class="tech-chips">
+                ${techs.map((tk) => `<span class="tech-chip">${esc(tk)}</span>`).join("")}
+              </div>
+            </td>
+            <td style="white-space:nowrap">
+              <strong>${esc(sub.submitted_by_username)}</strong>
+              <div style="color:var(--muted);font-size:0.74rem">${sub.reports_count || 1}x gemeldet</div>
+            </td>
+            <td>
+              <div style="font-size:0.78rem;color:#cbd5e1">${esc(sub.launcher || "Desktop Scan")}</div>
+              ${
+                sub.notes
+                  ? `<div style="font-size:0.74rem;color:var(--muted)">${esc(sub.notes)}</div>`
+                  : ""
+              }
+            </td>
+            <td style="text-align:right;white-space:nowrap">
+              <div style="display:inline-flex;gap:5px;align-items:center;justify-content:flex-end">
+                <button class="btn btn-xs btn-primary" onclick="approveSubmission('${esc(sub.id)}')">✅ Übernehmen</button>
+                <button class="btn btn-xs" onclick="editSubmission('${esc(sub.id)}')">✏️ Prüfen</button>
+                <button class="btn btn-xs btn-danger" onclick="deleteSubmission('${esc(sub.id)}')">🗑️</button>
+              </div>
+            </td>
+          </tr>`;
+          })
+          .join("");
+      }
+
+      async function approveSubmission(subId) {
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "approve_submission",
+            id: subId,
+          });
+          showToast(res.message || "✓ Spiel übernommen!");
+          loadAdminDashboard();
+          renderGames();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      function editSubmission(subId) {
+        const sub = adminSubmissionsList.find((x) => x.id === subId);
+        if (!sub) return;
+        let g = null;
+        try {
+          g = JSON.parse(sub.payload_json);
+        } catch {}
+        if (!g) return;
+        document.getElementById("game-modal-title").textContent = `📥 Prüfen & Übernehmen: ${g.title}`;
+        document.getElementById("gm-id").value = g.id || "";
+        document.getElementById("gm-title").value = g.title || "";
+        document.getElementById("gm-appids").value = (g.steam_app_ids || []).join(", ");
+        document.getElementById("gm-exes").value = (g.match_executables || []).join(", ");
+        document.getElementById("gm-ac").value = g.anticheat_status || "safe";
+        document.getElementById("gm-techs").value = (g.supported_techs || ["DLSS"]).join(", ");
+        document.getElementById("gm-sr").value = g.recommended_sr_preset || "Preset K";
+        document.getElementById("gm-rr-fg").value = `${g.recommended_rr_preset || ""} | ${
+          g.recommended_fg_preset || ""
+        }`;
+        document.getElementById("gm-warn").value = g.warning_banner || "";
+        document.getElementById("gm-unsupported").value = "";
+        document.getElementById("gm-settings").value = (g.recommended_settings || []).join("\n");
+        document.getElementById("modal-edit-game").style.display = "flex";
+      }
+
+      async function deleteSubmission(subId) {
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "delete_submission",
+            id: subId,
+          });
+          showToast(res.message || "✓ Verworfen.");
+          loadAdminDashboard();
         } catch (e) {
           showToast(e.message, true);
         }

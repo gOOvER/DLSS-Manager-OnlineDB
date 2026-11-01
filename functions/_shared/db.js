@@ -513,6 +513,22 @@ export async function ensureDbSchema(db) {
       value TEXT NOT NULL,
       updated_at TEXT NOT NULL
     )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS game_submissions (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      steam_app_id TEXT,
+      executable TEXT,
+      detected_techs TEXT NOT NULL,
+      launcher TEXT,
+      notes TEXT,
+      submitted_by_user_id INTEGER NOT NULL,
+      submitted_by_username TEXT NOT NULL,
+      reports_count INTEGER NOT NULL DEFAULT 1,
+      status TEXT NOT NULL DEFAULT 'pending',
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`),
   ]);

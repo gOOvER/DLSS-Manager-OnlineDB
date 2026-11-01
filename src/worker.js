@@ -9,6 +9,7 @@ import * as meHandler from "../functions/api/auth/me.js";
 import * as adminUsersHandler from "../functions/api/admin/users.js";
 import * as adminGamesHandler from "../functions/api/admin/games.js";
 import * as gamesJsonHandler from "../functions/api/v1/games.json.js";
+import * as reportGamesHandler from "../functions/api/v1/report.js";
 
 export default {
   async fetch(request, env, ctx) {
@@ -29,6 +30,10 @@ export default {
     try {
       if (path === "/api/v1/games.json" || path === "/api/v1/games") {
         if (method === "GET") return await gamesJsonHandler.onRequestGet(context);
+      }
+
+      if (path === "/api/v1/games/report" && method === "POST") {
+        return await reportGamesHandler.onRequestPost(context);
       }
 
       if (path === "/api/auth/discord" && method === "GET") {

@@ -37,7 +37,16 @@ export async function onRequestGet(context) {
       })
       .filter(Boolean);
 
-    return jsonResponse({ games });
+    const { results: subRows } = await db
+      .prepare(
+        "SELECT id, title, steam_app_id, executable, detected_techs, launcher, notes, submitted_by_username, reports_count, status, payload_json, created_at, updated_at FROM game_submissions ORDER BY updated_at DESC"
+      )
+      .all();
+
+    return jsonResponse({
+      games,
+      submissions: subRows || [],
+    });
   } catch (err) {
     return jsonResponse({ error: err.message || String(err) }, 500);
   }
@@ -61,6 +70,40 @@ export async function onRequestPost(context) {
       await db.prepare("DELETE FROM games WHERE id = ?1").bind(gameId).run();
       invalidateGamesMemoryCache();
       return jsonResponse({ message: `Deleted game profile '${gameId}'.` });
+    }
+
+    if (action === "delete_submission") {
+      const subId = String(body.id || "").trim();
+      if (!subId) return jsonResponse({ error: "Missing submission id" }, 400);
+      await db.prepare("DELETE FROM game_submissions WHERE id = ?1").bind(subId).run();
+      return jsonResponse({ message: `Gemeldetes Spiel '${subId}' verworfen.` });
+    }
+
+    if (action === "approve_submission") {
+      const subId = String(body.id || "").trim();
+      if (!subId) return jsonResponse({ error: "Missing submission id" }, 400);
+      const subRow = await db
+        .prepare("SELECT id, title, payload_json FROM game_submissions WHERE id = ?1")
+        .bind(subId)
+        .first();
+      if (!subRow) return jsonResponse({ error: "Submission not found" }, 404);
+
+      const parsed = JSON.parse(subRow.payload_json);
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          `INSERT OR REPLACE INTO games (id, title, payload_json, updated_at, updated_by)
+           VALUES (?1, ?2, ?3, ?4, ?5)`
+        )
+        .bind(parsed.id, parsed.title, JSON.stringify(parsed), now, admin.username)
+        .run();
+      await db.prepare("DELETE FROM game_submissions WHERE id = ?1").bind(subId).run();
+      invalidateGamesMemoryCache();
+
+      return jsonResponse({
+        message: `✓ '${parsed.title}' freigegeben und in die Live-Datenbank übernommen!`,
+        game: parsed,
+      });
     }
 
     const game = body.game;
@@ -104,6 +147,9 @@ export async function onRequestPost(context) {
       )
       .bind(entry.id, entry.title, JSON.stringify(entry), now, admin.username)
       .run();
+
+    // Also remove from pending submissions if it was in game_submissions
+    await db.prepare("DELETE FROM game_submissions WHERE id = ?1").bind(entry.id).run();
 
     invalidateGamesMemoryCache();
 
