@@ -79,6 +79,23 @@ export async function onRequestPost(context) {
       return jsonResponse({ message: `Gemeldetes Spiel '${subId}' verworfen.` });
     }
 
+    if (action === "bulk_delete_submissions") {
+      const ids = Array.isArray(body.ids)
+        ? body.ids.map((id) => String(id || "").trim()).filter(Boolean)
+        : [];
+      if (ids.length === 0) {
+        return jsonResponse({ error: "Keine Einträge ausgewählt." }, 400);
+      }
+      const stmts = ids.map((subId) =>
+        db.prepare("DELETE FROM game_submissions WHERE id = ?1").bind(subId)
+      );
+      await db.batch(stmts);
+      return jsonResponse({
+        message: `🗑️ ${ids.length} gemeldete Spiele verworfen.`,
+        count: ids.length,
+      });
+    }
+
     if (action === "approve_submission") {
       const subId = String(body.id || "").trim();
       if (!subId) return jsonResponse({ error: "Missing submission id" }, 400);
@@ -103,6 +120,55 @@ export async function onRequestPost(context) {
       return jsonResponse({
         message: `✓ '${parsed.title}' freigegeben und in die Live-Datenbank übernommen!`,
         game: parsed,
+      });
+    }
+
+    if (action === "bulk_approve_submissions") {
+      const ids = Array.isArray(body.ids)
+        ? body.ids.map((id) => String(id || "").trim()).filter(Boolean)
+        : [];
+      if (ids.length === 0) {
+        return jsonResponse({ error: "Keine Einträge ausgewählt." }, 400);
+      }
+
+      const { results: subRows } = await db
+        .prepare("SELECT id, title, payload_json FROM game_submissions")
+        .all();
+      const idSet = new Set(ids);
+      const matching = (subRows || []).filter((r) => idSet.has(r.id));
+      if (matching.length === 0) {
+        return jsonResponse({ error: "Keine passenden Meldungen gefunden." }, 404);
+      }
+
+      const now = new Date().toISOString();
+      const stmts = [];
+      for (const subRow of matching) {
+        try {
+          const parsed = JSON.parse(subRow.payload_json);
+          if (parsed && parsed.id && parsed.title) {
+            stmts.push(
+              db
+                .prepare(
+                  `INSERT OR REPLACE INTO games (id, title, payload_json, updated_at, updated_by)
+                   VALUES (?1, ?2, ?3, ?4, ?5)`
+                )
+                .bind(parsed.id, parsed.title, JSON.stringify(parsed), now, admin.username)
+            );
+          }
+          stmts.push(
+            db.prepare("DELETE FROM game_submissions WHERE id = ?1").bind(subRow.id)
+          );
+        } catch {}
+      }
+
+      if (stmts.length > 0) {
+        await db.batch(stmts);
+      }
+      invalidateGamesMemoryCache();
+
+      return jsonResponse({
+        message: `✓ ${matching.length} gemeldete Spiele freigegeben und in die Live-Datenbank übernommen!`,
+        count: matching.length,
       });
     }
 

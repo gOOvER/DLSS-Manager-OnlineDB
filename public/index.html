@@ -887,14 +887,57 @@
                 <span class="badge badge-blue" id="adm-submissions-badge">0 Ausstehend</span>
               </h3>
               <p style="color:var(--muted);font-size:0.82rem">
-                Spiele, die von Nutzern über ihren API Key aus <strong>DLSS Manager</strong> automatisch oder manuell gemeldet wurden. Mit 1 Klick prüfen oder direkt in die Live-DB übernehmen.
+                Spiele, die von Nutzern über ihren API Key aus <strong>DLSS Manager</strong> automatisch oder manuell gemeldet wurden. Mit Checkboxen einzeln, per Shift+Klick oder alle auf einmal übernehmen/verwerfen.
               </p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input
+                type="text"
+                id="admin-submissions-search"
+                class="input"
+                style="width:210px;padding:7px 11px;font-size:0.82rem"
+                placeholder="🔎 Gemeldete Spiele filtern..."
+                oninput="renderAdminSubmissionsTable()"
+              />
+              <button
+                class="btn btn-primary"
+                id="btn-bulk-approve-subs"
+                onclick="bulkApproveSelectedSubmissions()"
+                disabled
+              >
+                ✅ Ausgewählte übernehmen (<span id="adm-sub-sel-count">0</span>)
+              </button>
+              <button
+                class="btn"
+                id="btn-approve-all-subs"
+                onclick="approveAllSubmissions()"
+                style="border-color:rgba(118,185,0,0.45);color:#bef264"
+              >
+                ⚡ Alle übernehmen
+              </button>
+              <button
+                class="btn btn-danger"
+                id="btn-bulk-delete-subs"
+                onclick="bulkDeleteSelectedSubmissions()"
+                disabled
+              >
+                🗑️ Ausgewählte verwerfen (<span id="adm-sub-del-count">0</span>)
+              </button>
             </div>
           </div>
           <div style="overflow-x:auto">
             <table>
               <thead>
                 <tr>
+                  <th style="width:40px;text-align:center">
+                    <input
+                      type="checkbox"
+                      id="adm-sub-select-all"
+                      onchange="toggleSelectAllSubmissions(this.checked)"
+                      title="Alle sichtbaren Meldungen auswählen / abwählen"
+                      style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)"
+                    />
+                  </th>
                   <th style="min-width:200px">Gemeldetes Spiel / ID &amp; EXE</th>
                   <th style="min-width:130px">Status (Muss)</th>
                   <th style="min-width:190px">Techs &amp; Optionale Settings</th>
@@ -1967,6 +2010,106 @@
         }
       }
 
+      let selectedSubmissionIds = new Set();
+      let lastClickedSubmissionId = null;
+
+      function getFilteredSubmissions() {
+        const q = (document.getElementById("admin-submissions-search")?.value || "")
+          .trim()
+          .toLowerCase();
+        if (!q) return adminSubmissionsList;
+        return adminSubmissionsList.filter((sub) => {
+          return (
+            String(sub.title || "").toLowerCase().includes(q) ||
+            String(sub.id || "").toLowerCase().includes(q) ||
+            String(sub.steam_app_id || "").toLowerCase().includes(q) ||
+            String(sub.executable || "").toLowerCase().includes(q) ||
+            String(sub.detected_techs || "").toLowerCase().includes(q) ||
+            String(sub.submitted_by_username || "").toLowerCase().includes(q) ||
+            String(sub.launcher || "").toLowerCase().includes(q)
+          );
+        });
+      }
+
+      function updateSubmissionSelectionUi() {
+        // Keep only IDs that still exist in adminSubmissionsList
+        const validIds = new Set(adminSubmissionsList.map((s) => s.id));
+        for (const id of Array.from(selectedSubmissionIds)) {
+          if (!validIds.has(id)) selectedSubmissionIds.delete(id);
+        }
+
+        const filtered = getFilteredSubmissions();
+        const selCount = selectedSubmissionIds.size;
+
+        const selSpan = document.getElementById("adm-sub-sel-count");
+        const delSpan = document.getElementById("adm-sub-del-count");
+        if (selSpan) selSpan.textContent = String(selCount);
+        if (delSpan) delSpan.textContent = String(selCount);
+
+        const btnBulkApprove = document.getElementById("btn-bulk-approve-subs");
+        const btnBulkDelete = document.getElementById("btn-bulk-delete-subs");
+        const btnApproveAll = document.getElementById("btn-approve-all-subs");
+        if (btnBulkApprove) btnBulkApprove.disabled = selCount === 0;
+        if (btnBulkDelete) btnBulkDelete.disabled = selCount === 0;
+        if (btnApproveAll) {
+          btnApproveAll.disabled = adminSubmissionsList.length === 0;
+          btnApproveAll.textContent =
+            adminSubmissionsList.length > 0
+              ? `⚡ Alle übernehmen (${adminSubmissionsList.length})`
+              : "⚡ Alle übernehmen";
+        }
+
+        const masterCb = document.getElementById("adm-sub-select-all");
+        if (masterCb) {
+          if (filtered.length === 0) {
+            masterCb.checked = false;
+            masterCb.indeterminate = false;
+          } else {
+            const checkedInFiltered = filtered.filter((s) =>
+              selectedSubmissionIds.has(s.id)
+            ).length;
+            masterCb.checked = checkedInFiltered === filtered.length;
+            masterCb.indeterminate =
+              checkedInFiltered > 0 && checkedInFiltered < filtered.length;
+          }
+        }
+      }
+
+      function toggleSubmissionCheckbox(event, subId) {
+        const checked = event.target.checked;
+        const filtered = getFilteredSubmissions();
+
+        if (event.shiftKey && lastClickedSubmissionId && lastClickedSubmissionId !== subId) {
+          const idxA = filtered.findIndex((s) => s.id === lastClickedSubmissionId);
+          const idxB = filtered.findIndex((s) => s.id === subId);
+          if (idxA !== -1 && idxB !== -1) {
+            const start = Math.min(idxA, idxB);
+            const end = Math.max(idxA, idxB);
+            for (let i = start; i <= end; i++) {
+              if (checked) selectedSubmissionIds.add(filtered[i].id);
+              else selectedSubmissionIds.delete(filtered[i].id);
+            }
+            lastClickedSubmissionId = subId;
+            renderAdminSubmissionsTable();
+            return;
+          }
+        }
+
+        if (checked) selectedSubmissionIds.add(subId);
+        else selectedSubmissionIds.delete(subId);
+        lastClickedSubmissionId = subId;
+        updateSubmissionSelectionUi();
+      }
+
+      function toggleSelectAllSubmissions(checked) {
+        const filtered = getFilteredSubmissions();
+        for (const sub of filtered) {
+          if (checked) selectedSubmissionIds.add(sub.id);
+          else selectedSubmissionIds.delete(sub.id);
+        }
+        renderAdminSubmissionsTable();
+      }
+
       function renderAdminSubmissionsTable() {
         const tbody = document.getElementById("admin-submissions-tbody");
         const badge = document.getElementById("adm-submissions-badge");
@@ -1975,12 +2118,19 @@
         }
         if (!tbody) return;
 
-        if (adminSubmissionsList.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px">Keine offenen Spiele-Meldungen vorhanden.</td></tr>`;
+        const filtered = getFilteredSubmissions();
+        updateSubmissionSelectionUi();
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">${
+            adminSubmissionsList.length === 0
+              ? "Keine offenen Spiele-Meldungen vorhanden."
+              : "Keine Meldungen für diesen Suchbegriff gefunden."
+          }</td></tr>`;
           return;
         }
 
-        tbody.innerHTML = adminSubmissionsList
+        tbody.innerHTML = filtered
           .map((sub) => {
             const techs = String(sub.detected_techs || "")
               .split(",")
@@ -1990,8 +2140,19 @@
             const statusHtml = isBroken
               ? `<span class="ac-pill ac-blocked">❌ Geht nicht</span>`
               : `<span class="ac-pill ac-safe">✅ Geht</span>`;
+            const isChecked = selectedSubmissionIds.has(sub.id);
             return `
-          <tr>
+          <tr style="${isChecked ? "background:rgba(118,185,0,0.08)" : ""}">
+            <td style="text-align:center">
+              <input
+                type="checkbox"
+                class="adm-sub-cb"
+                value="${esc(sub.id)}"
+                ${isChecked ? "checked" : ""}
+                onclick="toggleSubmissionCheckbox(event, '${esc(sub.id)}')"
+                style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)"
+              />
+            </td>
             <td>
               <div style="font-weight:700;font-size:0.92rem">${esc(sub.title)}</div>
               <div style="font-family:Consolas,monospace;font-size:0.74rem;color:var(--muted);margin-top:2px">
@@ -2041,9 +2202,73 @@
             action: "approve_submission",
             id: subId,
           });
+          selectedSubmissionIds.delete(subId);
           showToast(res.message || "✓ Spiel übernommen!");
           loadAdminDashboard();
           renderGames();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function bulkApproveSelectedSubmissions() {
+        const ids = Array.from(selectedSubmissionIds);
+        if (ids.length === 0) return;
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "bulk_approve_submissions",
+            ids,
+          });
+          selectedSubmissionIds.clear();
+          showToast(res.message || `✓ ${ids.length} Spiele übernommen!`);
+          await loadAdminDashboard();
+          renderGames();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function approveAllSubmissions() {
+        const filtered = getFilteredSubmissions();
+        const ids = filtered.map((s) => s.id);
+        if (ids.length === 0) return;
+        if (
+          ids.length > 5 &&
+          !confirm(`Alle ${ids.length} sichtbaren Spiele-Meldungen jetzt in die Live-Datenbank übernehmen?`)
+        ) {
+          return;
+        }
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "bulk_approve_submissions",
+            ids,
+          });
+          selectedSubmissionIds.clear();
+          showToast(res.message || `✓ Alle ${ids.length} Spiele übernommen!`);
+          await loadAdminDashboard();
+          renderGames();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function bulkDeleteSelectedSubmissions() {
+        const ids = Array.from(selectedSubmissionIds);
+        if (ids.length === 0) return;
+        if (
+          ids.length > 1 &&
+          !confirm(`${ids.length} ausgewählte Spiele-Meldungen unwiderruflich verwerfen?`)
+        ) {
+          return;
+        }
+        try {
+          const res = await apiRequest("/api/admin/games", "POST", {
+            action: "bulk_delete_submissions",
+            ids,
+          });
+          selectedSubmissionIds.clear();
+          showToast(res.message || `🗑️ ${ids.length} Meldungen verworfen.`);
+          await loadAdminDashboard();
         } catch (e) {
           showToast(e.message, true);
         }
