@@ -151,8 +151,16 @@
         background: rgba(255, 255, 255, 0.13);
       }
       .btn-sm {
-        padding: 5px 10px;
-        font-size: 0.77rem;
+        padding: 4px 9px;
+        font-size: 0.75rem;
+        border-radius: 7px;
+      }
+      .btn-xs {
+        padding: 3px 7px;
+        font-size: 0.71rem;
+        border-radius: 6px;
+        gap: 4px;
+        line-height: 1.2;
       }
       .btn-primary {
         background: rgba(118, 185, 0, 0.22);
@@ -622,11 +630,11 @@
               </label>
               <div class="api-key-box">
                 <span id="user-api-key-display">dlss_live_••••••••••••••••••••••••</span>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <button class="btn" onclick="toggleRevealMyKey()" data-i18n="btn_show_hide">👁️ Zeigen/Verbergen</button>
-                  <button class="btn btn-primary" onclick="copyMyApiKey()" data-i18n="btn_copy_key">📋 API Key kopieren</button>
-                  <button class="btn" onclick="regenerateMyApiKey()" data-i18n="btn_regen_key">🔄 Neuen Key generieren</button>
-                  <button class="btn btn-danger" onclick="revokeMyApiKey()" data-i18n="btn_revoke_key">🚫 Key widerrufen</button>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button class="btn btn-sm" onclick="toggleRevealMyKey()" data-i18n="btn_show_hide">👁️ Zeigen/Verbergen</button>
+                  <button class="btn btn-sm btn-primary" onclick="copyMyApiKey()" data-i18n="btn_copy_key">📋 Kopieren</button>
+                  <button class="btn btn-sm" onclick="regenerateMyApiKey()" data-i18n="btn_regen_key">🔄 Neu generieren</button>
+                  <button class="btn btn-sm btn-danger" onclick="revokeMyApiKey()" data-i18n="btn_revoke_key">🚫 Widerrufen</button>
                 </div>
               </div>
             </div>
@@ -952,9 +960,10 @@
           btn_logout: "🚪 Abmelden",
           lbl_personal_key: "DEIN PERSÖNLICHER DLSS-DB API KEY",
           btn_show_hide: "👁️ Zeigen/Verbergen",
-          btn_copy_key: "📋 API Key kopieren",
-          btn_regen_key: "🔄 Neuen Key generieren",
-          btn_revoke_key: "🚫 Key widerrufen",
+          btn_copy_key: "📋 Kopieren",
+          btn_copy_short: "Kopieren",
+          btn_regen_key: "🔄 Neu generieren",
+          btn_revoke_key: "🚫 Widerrufen",
           stat_user_syncs: "API Sync-Abrufe",
           stat_user_last: "Letzter Abruf",
           stat_user_created: "Key erstellt am",
@@ -1069,9 +1078,10 @@
           btn_logout: "🚪 Sign Out",
           lbl_personal_key: "YOUR PERSONAL DLSS-DB API KEY",
           btn_show_hide: "👁️ Show/Hide",
-          btn_copy_key: "📋 Copy API Key",
-          btn_regen_key: "🔄 Generate New Key",
-          btn_revoke_key: "🚫 Revoke Key",
+          btn_copy_key: "📋 Copy",
+          btn_copy_short: "Copy",
+          btn_regen_key: "🔄 Regenerate",
+          btn_revoke_key: "🚫 Revoke",
           stat_user_syncs: "API Sync Requests",
           stat_user_last: "Last Sync Access",
           stat_user_created: "Key Created At",
@@ -1740,12 +1750,14 @@
             <td style="white-space:nowrap">
               ${
                 u.api_key
-                  ? `<button class="btn btn-sm" style="font-family:Consolas,monospace;color:#bef264;background:rgba(118,185,0,0.1);border-color:rgba(118,185,0,0.3)" title="${esc(
-                      u.api_key
-                    )}" onclick="copyAdminUserKey('${esc(u.api_key)}')">
-                      <span>${esc(shortKey)}</span>
-                      <span>📋</span>
-                    </button>`
+                  ? `<div style="display:inline-flex;align-items:center;gap:6px">
+                      <code style="font-family:Consolas,monospace;font-size:0.75rem;color:#bef264;background:rgba(118,185,0,0.08);padding:2px 7px;border-radius:5px;border:1px solid rgba(118,185,0,0.25)" title="${esc(
+                        u.api_key
+                      )}">${esc(shortKey)}</code>
+                      <button class="btn btn-xs btn-primary" onclick="copyAdminUserKey('${esc(
+                        u.api_key
+                      )}')" title="Vollständigen API Key kopieren">📋 ${t("btn_copy_short")}</button>
+                    </div>`
                   : `<span style="color:var(--muted)">${t("no_key")}</span>`
               }
             </td>
@@ -1758,16 +1770,16 @@
               }</div>
             </td>
             <td style="text-align:right;white-space:nowrap">
-              <div style="display:inline-flex;gap:5px;flex-wrap:nowrap;align-items:center;justify-content:flex-end">
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'regenerate_key')" title="Neuen API Key generieren">🔄 Key</button>
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'revoke_key')" title="API Key widerrufen">🚫 Key</button>
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'set_role', '${
+              <div style="display:inline-flex;gap:4px;flex-wrap:nowrap;align-items:center;justify-content:flex-end">
+                <button class="btn btn-xs" onclick="adminUserAction(${u.id}, 'regenerate_key')" title="Neuen API Key generieren">🔄 Key</button>
+                <button class="btn btn-xs" onclick="adminUserAction(${u.id}, 'revoke_key')" title="API Key widerrufen">🚫 Key</button>
+                <button class="btn btn-xs" onclick="adminUserAction(${u.id}, 'set_role', '${
               u.role === "admin" ? "user" : "admin"
             }')">${u.role === "admin" ? "⬇️ User" : "⬆️ Admin"}</button>
-                <button class="btn btn-sm" onclick="adminUserAction(${u.id}, 'toggle_active')">${
+                <button class="btn btn-xs" onclick="adminUserAction(${u.id}, 'toggle_active')">${
               Number(u.is_active) === 1 ? t("btn_suspend") : t("btn_activate")
             }</button>
-                <button class="btn btn-sm btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')" title="Nutzer löschen">🗑️</button>
+                <button class="btn btn-xs btn-danger" onclick="adminUserAction(${u.id}, 'delete_user')" title="Nutzer löschen">🗑️</button>
               </div>
             </td>
           </tr>`;
@@ -1879,9 +1891,9 @@
             <td>${techsHtml}</td>
             <td>${presetsHtml}</td>
             <td style="text-align:right">
-              <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap">
-                <button class="btn btn-sm" onclick="openGameEditorModal('${esc(g.id)}')">${t("btn_edit")}</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteGameProfile('${esc(g.id)}')">🗑️</button>
+              <div style="display:inline-flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:nowrap">
+                <button class="btn btn-xs" onclick="openGameEditorModal('${esc(g.id)}')">${t("btn_edit")}</button>
+                <button class="btn btn-xs btn-danger" onclick="deleteGameProfile('${esc(g.id)}')">🗑️</button>
               </div>
             </td>
           </tr>`;
