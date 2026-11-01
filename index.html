@@ -696,6 +696,35 @@
           </div>
         </div>
 
+        <!-- Admin Discord OAuth2 Direct Configuration (Stored in D1 — no Cloudflare redeploy needed) -->
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+            <div>
+              <h3 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span>🎮 Discord OAuth2 Konfiguration</span>
+                <span class="badge" id="adm-discord-status-badge">Prüfe...</span>
+              </h3>
+              <p style="color:var(--muted);font-size:0.82rem">
+                Speichere deine Discord <strong>Client ID</strong> &amp; <strong>Client Secret</strong> direkt in der Cloudflare D1-Datenbank — <strong>sofort aktiv ohne manuellen Cloudflare-Deploy!</strong>
+                Redirect URI im Discord Portal: <code style="color:#bef264;cursor:pointer" onclick="navigator.clipboard.writeText('https://dlssdb.goover.dev/api/auth/discord/callback');showToast('📋 Redirect URI kopiert!')">https://dlssdb.goover.dev/api/auth/discord/callback 📋</code>
+              </p>
+            </div>
+          </div>
+          <div class="two-col" style="gap:12px;align-items:end">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Discord Application Client ID</label>
+              <input type="text" id="adm-discord-client-id" class="input" placeholder="z.B. 1298765432109876543" />
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Discord Application Client Secret</label>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="adm-discord-client-secret" class="input" placeholder="Client Secret eingeben..." />
+                <button class="btn btn-primary" onclick="saveAdminDiscordConfig()">💾 In D1 speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Admin User Management -->
         <div class="panel">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
@@ -1618,8 +1647,42 @@
           document.getElementById("adm-stat-games").textContent =
             data.stats?.total_games || allGames.length;
 
+          const cidInput = document.getElementById("adm-discord-client-id");
+          const csecInput = document.getElementById("adm-discord-client-secret");
+          const dStatus = document.getElementById("adm-discord-status-badge");
+          if (cidInput && data.discord_config) {
+            cidInput.value = data.discord_config.client_id || "";
+            if (csecInput) {
+              csecInput.placeholder = data.discord_config.has_secret
+                ? "•••••••••••••••• (Gespeichert — leer lassen zum Behalten)"
+                : "Client Secret eingeben...";
+            }
+            if (dStatus) {
+              const ok = Boolean(data.discord_config.client_id && data.discord_config.has_secret);
+              dStatus.textContent = ok ? "✅ Aktiv" : "⚠️ Noch nicht hinterlegt";
+              dStatus.className = ok ? "badge" : "badge badge-blue";
+            }
+          }
+
           renderAdminUsersTable();
           renderAdminGamesTable();
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
+
+      async function saveAdminDiscordConfig() {
+        const client_id = document.getElementById("adm-discord-client-id").value.trim();
+        const client_secret = document.getElementById("adm-discord-client-secret").value.trim();
+        try {
+          const res = await apiRequest("/api/admin/users", "POST", {
+            action: "save_discord_config",
+            client_id,
+            client_secret,
+          });
+          document.getElementById("adm-discord-client-secret").value = "";
+          showToast(res.message || "✓ Discord OAuth2 gespeichert!");
+          loadAdminDashboard();
         } catch (e) {
           showToast(e.message, true);
         }

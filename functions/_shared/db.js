@@ -508,6 +508,11 @@ export async function ensureDbSchema(db) {
       updated_at TEXT NOT NULL,
       updated_by TEXT
     )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`),
   ]);
@@ -567,4 +572,29 @@ export async function getAuthenticatedUser(request, db) {
 
   if (!row || Number(row.is_active) === 0) return null;
   return row;
+}
+
+export async function getDiscordCredentials(env, db) {
+  let clientId = (env.DISCORD_CLIENT_ID || "").trim();
+  let clientSecret = (env.DISCORD_CLIENT_SECRET || "").trim();
+
+  if ((!clientId || !clientSecret) && db) {
+    try {
+      await ensureDbSchema(db);
+      const { results } = await db
+        .prepare(
+          "SELECT key, value FROM app_settings WHERE key IN ('discord_client_id', 'discord_client_secret')"
+        )
+        .all();
+      for (const r of results || []) {
+        if (r.key === "discord_client_id" && !clientId) clientId = String(r.value || "").trim();
+        if (r.key === "discord_client_secret" && !clientSecret)
+          clientSecret = String(r.value || "").trim();
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return { clientId, clientSecret };
 }

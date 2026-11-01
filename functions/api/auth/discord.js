@@ -1,6 +1,7 @@
 import {
   ensureDbSchema,
   generateApiKey,
+  getDiscordCredentials,
   hashPassword,
   optionsResponse,
   randomHex,
@@ -36,8 +37,10 @@ function parseCookies(cookieHeader) {
 // Supports optional ?link_token=sess_... to explicitly link an already logged-in Admin/User account
 export async function onRequestStart(context) {
   const url = new URL(context.request.url);
-  const clientId = (context.env.DISCORD_CLIENT_ID || "").trim();
-  const clientSecret = (context.env.DISCORD_CLIENT_SECRET || "").trim();
+  const { clientId, clientSecret } = await getDiscordCredentials(
+    context.env,
+    context.env.DB
+  );
 
   if (!clientId || !clientSecret) {
     return Response.redirect(
@@ -103,8 +106,10 @@ export async function onRequestCallback(context) {
       );
     }
 
-    const clientId = (context.env.DISCORD_CLIENT_ID || "").trim();
-    const clientSecret = (context.env.DISCORD_CLIENT_SECRET || "").trim();
+    const { clientId, clientSecret } = await getDiscordCredentials(
+      context.env,
+      context.env.DB
+    );
     if (!clientId || !clientSecret) {
       return Response.redirect(
         `${origin}/?auth_error=DISCORD_NOT_CONFIGURED#account`,

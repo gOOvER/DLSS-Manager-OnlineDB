@@ -2,6 +2,7 @@ import {
   ensureDbSchema,
   generateApiKey,
   getAuthenticatedUser,
+  getDiscordCredentials,
   hashPassword,
   jsonResponse,
   optionsResponse,
@@ -34,6 +35,7 @@ export async function onRequestGet(context) {
       (sum, u) => sum + Number(u.api_requests_count || 0),
       0
     );
+    const discordCreds = await getDiscordCredentials(context.env, db);
 
     return jsonResponse({
       stats: {
@@ -41,6 +43,10 @@ export async function onRequestGet(context) {
         active_keys: (users || []).filter((u) => u.api_key && Number(u.is_active) === 1).length,
         total_api_requests: totalRequests,
         total_games: Number(gamesCountRow?.cnt || 0),
+      },
+      discord_config: {
+        client_id: discordCreds.clientId || "",
+        has_secret: Boolean(discordCreds.clientSecret),
       },
       users: users || [],
     });
@@ -61,6 +67,33 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     const action = body.action;
     const targetId = Number(body.user_id);
+
+    if (action === "save_discord_config") {
+      const clientId = String(body.client_id || "").trim();
+      const clientSecret = String(body.client_secret || "").trim();
+      if (!clientId) {
+        return jsonResponse({ error: "Discord Client ID darf nicht leer sein." }, 400);
+      }
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "INSERT INTO app_settings (key, value, updated_at) VALUES ('discord_client_id', ?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at"
+        )
+        .bind(clientId, now)
+        .run();
+
+      if (clientSecret) {
+        await db
+          .prepare(
+            "INSERT INTO app_settings (key, value, updated_at) VALUES ('discord_client_secret', ?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at"
+          )
+          .bind(clientSecret, now)
+          .run();
+      }
+      return jsonResponse({
+        message: "Discord OAuth2 Konfiguration in D1 gespeichert! Sofort aktiv ohne Cloudflare-Redeploy.",
+      });
+    }
 
     if (action === "create_user") {
       const username = String(body.username || "").trim();
