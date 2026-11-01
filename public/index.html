@@ -692,12 +692,12 @@
 
             <div class="two-col" style="gap:14px;align-items:start">
               <div class="form-group" style="margin-bottom:0">
-                <label>Spieletitel <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
-                <input type="text" id="rep-title" class="input" placeholder="z.B. Star Citizen, Overwatch 2, Kingdom Come II..." />
+                <label data-i18n="rep_lbl_title">Spieletitel <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
+                <input type="text" id="rep-title" class="input" data-i18n-placeholder="rep_ph_title" placeholder="z.B. Star Citizen, Overwatch 2, Kingdom Come II..." />
               </div>
 
               <div class="form-group" style="margin-bottom:0">
-                <label>Funktioniert DLSS / Upscaler-Update? <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
+                <label data-i18n="rep_lbl_status">Funktioniert DLSS / Upscaler-Update? <span style="color:#a3e635;font-weight:700">* (Pflichtfeld)</span></label>
                 <input type="hidden" id="rep-works-status" value="works" />
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
                   <button
@@ -706,6 +706,7 @@
                     class="btn"
                     onclick="setWebReportWorksStatus('works')"
                     style="justify-content:center;border-color:rgba(118,185,0,0.65);background:rgba(118,185,0,0.18);color:#d9f99d;font-weight:700"
+                    data-i18n="rep_btn_works"
                   >
                     ✅ Geht (Funktioniert)
                   </button>
@@ -715,6 +716,7 @@
                     class="btn"
                     onclick="setWebReportWorksStatus('broken')"
                     style="justify-content:center;opacity:0.7"
+                    data-i18n="rep_btn_broken"
                   >
                     ❌ Geht nicht (Probleme)
                   </button>
@@ -724,13 +726,13 @@
 
             <div class="two-col" style="gap:12px;margin-top:12px">
               <div class="form-group" style="margin-bottom:0">
-                <label>Empfohlene In-Game Einstellungen <span style="color:var(--muted)">(Optional)</span></label>
-                <input type="text" id="rep-settings" class="input" placeholder="z.B. Graphics Renderer: Vulkan; Upscaling: DLSS Quality" />
+                <label data-i18n="rep_lbl_settings">Empfohlene In-Game Einstellungen <span style="color:var(--muted)">(Optional)</span></label>
+                <input type="text" id="rep-settings" class="input" data-i18n-placeholder="rep_ph_settings" placeholder="z.B. Graphics Renderer: Vulkan; Upscaling: DLSS Quality" />
               </div>
               <div class="form-group" style="margin-bottom:0">
-                <label>Empfohlenes DLSS Preset <span style="color:var(--muted)">(Optional)</span></label>
+                <label data-i18n="rep_lbl_preset">Empfohlenes DLSS Preset <span style="color:var(--muted)">(Optional)</span></label>
                 <select id="rep-preset" class="select">
-                  <option value="">— Keine Angabe (Optional) —</option>
+                  <option value="" data-i18n="rep_opt_none">— Keine Angabe (Optional) —</option>
                   <option value="Preset K">Preset K (DLSS 4.5 Transformer Gen 2)</option>
                   <option value="Preset J">Preset J (DLSS 4.5 Transformer)</option>
                   <option value="Latest">Latest (Driver Default)</option>
@@ -739,24 +741,24 @@
                 </select>
               </div>
               <div class="form-group" style="margin-bottom:0">
-                <label>Unterstützte Technologien <span style="color:var(--muted)">(Optional, Komma-getrennt)</span></label>
-                <input type="text" id="rep-techs" class="input" placeholder="z.B. DLSS, DLSS-G, FSR 3/4, XeSS" />
+                <label data-i18n="rep_lbl_techs">Unterstützte Technologien <span style="color:var(--muted)">(Optional, Komma-getrennt)</span></label>
+                <input type="text" id="rep-techs" class="input" placeholder="DLSS, DLSS-G, FSR 3/4, XeSS" />
               </div>
               <div class="form-group" style="margin-bottom:0">
-                <label>Steam App ID &amp; Executable <span style="color:var(--muted)">(Optional)</span></label>
+                <label data-i18n="rep_lbl_appid_exe">Steam App ID &amp; Executable <span style="color:var(--muted)">(Optional)</span></label>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                  <input type="text" id="rep-appid" class="input" placeholder="AppID (z.B. 2357570)" />
-                  <input type="text" id="rep-exe" class="input" placeholder="EXE (z.B. game.exe)" />
+                  <input type="text" id="rep-appid" class="input" placeholder="AppID (2357570)" />
+                  <input type="text" id="rep-exe" class="input" placeholder="EXE (game.exe)" />
                 </div>
               </div>
             </div>
 
             <div style="display:flex;gap:12px;align-items:end;margin-top:12px;flex-wrap:wrap">
               <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0">
-                <label>Hinweise / Fehlerbeschreibung / Anti-Cheat Info <span style="color:var(--muted)">(Optional)</span></label>
-                <input type="text" id="rep-notes" class="input" placeholder="Optional: z.B. Warum geht es nicht, oder worauf muss man achten?" />
+                <label data-i18n="rep_lbl_notes">Hinweise / Fehlerbeschreibung / Anti-Cheat Info <span style="color:var(--muted)">(Optional)</span></label>
+                <input type="text" id="rep-notes" class="input" data-i18n-placeholder="rep_ph_notes" placeholder="Optional: z.B. Warum geht es nicht, oder worauf muss man achten?" />
               </div>
-              <button class="btn btn-primary" onclick="submitUserGameReport()">📤 Meldung absenden</button>
+              <button class="btn btn-primary" onclick="submitUserGameReport()" data-i18n="rep_btn_submit">📤 Meldung absenden</button>
             </div>
           </div>
         </div>
@@ -1175,6 +1177,23 @@
           account_created_on: "Account erstellt am",
           no_active_key_msg:
             "Kein aktiver API Key — bitte auf '🔄 Neuen Key generieren' klicken.",
+          user_report_title: "📤 Spiel an die Datenbank melden",
+          user_report_sub:
+            "Funktioniert ein DLSS-Upgrade oder funktioniert es nicht? Melde dein Spiel an die Community — die Freischaltung erfolgt nach Admin-Prüfung.",
+          rep_lbl_title: "Spieletitel (Pflichtfeld) *",
+          rep_ph_title: "z.B. Star Citizen, Cyberpunk 2077...",
+          rep_lbl_status: "Status (Pflichtfeld) *",
+          rep_btn_works: "✅ Geht (Funktioniert)",
+          rep_btn_broken: "❌ Geht nicht (Probleme / Blockiert)",
+          rep_lbl_settings: "Empfohlene In-Game Einstellungen (Optional)",
+          rep_ph_settings: "Eine pro Zeile, z.B. DLSS Super Resolution: Quality",
+          rep_lbl_preset: "Empfohlenes DLSS Preset (Optional)",
+          rep_opt_none: "— Keine Angabe —",
+          rep_lbl_techs: "Technologien (Optional, Komma-getrennt)",
+          rep_lbl_appid_exe: "Steam App ID / EXE (Optional)",
+          rep_lbl_notes: "Notizen / Fehlerbeschreibung (Optional)",
+          rep_ph_notes: "Was funktioniert gut oder welcher Fehler tritt auf?",
+          rep_btn_submit: "🚀 Meldung absenden",
         },
         en: {
           header_sub:
@@ -1293,6 +1312,23 @@
           account_created_on: "Account created on",
           no_active_key_msg:
             "No active API Key — click '🔄 Generate New Key' to create one.",
+          user_report_title: "📤 Submit Game Report to Database",
+          user_report_sub:
+            "Does a DLSS upgrade work or not? Report your game to the community — it will be published after admin review.",
+          rep_lbl_title: "Game Title (Required) *",
+          rep_ph_title: "e.g. Star Citizen, Cyberpunk 2077...",
+          rep_lbl_status: "Status (Required) *",
+          rep_btn_works: "✅ Works (Functional)",
+          rep_btn_broken: "❌ Doesn't Work (Issues / Blocked)",
+          rep_lbl_settings: "Recommended In-Game Settings (Optional)",
+          rep_ph_settings: "One per line, e.g. DLSS Super Resolution: Quality",
+          rep_lbl_preset: "Recommended DLSS Preset (Optional)",
+          rep_opt_none: "— None Specified —",
+          rep_lbl_techs: "Technologies (Optional, comma-separated)",
+          rep_lbl_appid_exe: "Steam App ID / EXE (Optional)",
+          rep_lbl_notes: "Notes / Issue Description (Optional)",
+          rep_ph_notes: "What works well or what issue occurs?",
+          rep_btn_submit: "🚀 Submit Report",
         },
       };
 
