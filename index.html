@@ -2173,8 +2173,13 @@
               .map((s) => s.trim())
               .filter(Boolean);
             const isBroken = sub.works_status === "broken";
+            const isUnverified =
+              sub.works_status === "unverified" ||
+              (!sub.works_status && String(sub.notes || "").startsWith("Auto-detected"));
             const statusHtml = isBroken
               ? `<span class="ac-pill ac-blocked">❌ Geht nicht</span>`
+              : isUnverified
+              ? `<span class="ac-pill ac-unverified">🔎 Unverifiziert</span>`
               : `<span class="ac-pill ac-safe">✅ Geht</span>`;
             const isChecked = selectedSubmissionIds.has(sub.id);
             return `
