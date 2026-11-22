@@ -373,31 +373,18 @@
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     }
 
-        <div class="toolbar">
-          <input
-            type="search"
-            id="search"
-            name="dlss_game_search"
-            autocomplete="off"
-            data-lpignore="true"
-            readonly
-            onfocus="this.removeAttribute('readonly')"
-            class="input"
-            style="flex:1;min-width:240px"
-            data-i18n-placeholder="search_placeholder"
-            placeholder="Suche nach Spieletitel, Steam AppID, EXE oder Technologie..."
-          />
-          <select id="ac-filter" class="select" style="width:auto;min-width:230px">
-            <option value="all" data-i18n="ac_filter_all">Alle Anti-Cheat-Einstufungen</option>
-            <option value="safe" data-i18n="ac_filter_safe">✅ Sicher (Voller DLL-Tausch)</option>
-            <option value="signed_only" data-i18n="ac_filter_signed">🛡️ Nur signierte DLLs</option>
-            <option value="driver_override_only" data-i18n="ac_filter_driver">🎛️ Nur Treiber-Override</option>
-            <option value="unverified">🔎 Unverifiziert (Auto-Scan)</option>
-            <option value="blocked" data-i18n="ac_filter_blocked">⛔ Gesperrt</option>
-          </select>
-        </div>
+    <div class="toolbar"><input type="search"
+    id="search"
+    name="dlss_game_search"
+    autocomplete="off"
+    data-lpignore="true"
+    readonly onfocus="this.removeAttribute('readonly')"
+    class="input"
+    style="flex:1;min-width:240px"
+    data-i18n-placeholder="search_placeholder"
+    placeholder="Suche nach Spieletitel, Steam AppID, EXE oder Technologie..."
 
-    .card-top {
+    /><select id="ac-filter" class="select" style="width:auto;min-width:230px"><option value="all" data-i18n="ac_filter_all">Alle Anti-Cheat-Einstufungen</option><option value="safe" data-i18n="ac_filter_safe">✅ Sicher (Voller DLL-Tausch)</option><option value="signed_only" data-i18n="ac_filter_signed">🛡️ Nur signierte DLLs</option><option value="driver_override_only" data-i18n="ac_filter_driver">🎛️ Nur Treiber-Override</option><option value="unverified">🔎 Unverifiziert (Auto-Scan)</option><option value="blocked" data-i18n="ac_filter_blocked">⛔ Gesperrt</option></select></div>.card-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -576,6 +563,10 @@
       justify-content: center;
       padding: 20px;
       z-index: 1000;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
     }
 
     .modal-box {
@@ -1963,11 +1954,15 @@
       document.getElementById("gd-rep-notes").value = (g.recommended_settings || []).join("\n");
       document.getElementById("gd-rep-auth-hint").style.display = currentUser ? "none" : "inline";
 
-      document.getElementById("modal-game-detail").classList.add("open");
+      const detailModal = document.getElementById("modal-game-detail");
+      detailModal.classList.add("open");
+      detailModal.style.display = "flex";
     }
 
     function closeGameDetailModal() {
-      document.getElementById("modal-game-detail").classList.remove("open");
+      const detailModal = document.getElementById("modal-game-detail");
+      detailModal.classList.remove("open");
+      detailModal.style.display = "none";
       currentDetailGame = null;
     }
 
