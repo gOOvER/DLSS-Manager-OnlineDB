@@ -530,8 +530,13 @@
 
         <div class="toolbar">
           <input
-            type="text"
+            type="search"
             id="search"
+            name="dlss_game_search"
+            autocomplete="off"
+            data-lpignore="true"
+            readonly
+            onfocus="this.removeAttribute('readonly')"
             class="input"
             style="flex:1;min-width:240px"
             data-i18n-placeholder="search_placeholder"
