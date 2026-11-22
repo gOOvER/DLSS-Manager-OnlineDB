@@ -143,7 +143,11 @@ export async function onRequestPost(context) {
           400
         );
       }
-      const worksStatus = rawStatus === "broken" ? "broken" : "works";
+      const worksStatus = isManualReport
+        ? rawStatus === "broken"
+          ? "broken"
+          : "works"
+        : "unverified";
 
       const baseId = slugifyGameId(item.id, title);
       const appIds = Array.isArray(item.steam_app_ids)
@@ -160,7 +164,12 @@ export async function onRequestPost(context) {
         ? item.supported_techs.map(String).filter(Boolean)
         : [];
       const launcher = String(item.launcher || "").trim();
-      const notes = String(item.notes || "").trim();
+      const referenceUrl = String(item.reference_url || "").trim() ||
+        (appIds[0] && /^\d+$/.test(appIds[0])
+          ? `https://steamdb.info/app/${appIds[0]}/`
+          : `https://www.pcgamingwiki.com/w/index.php?search=${encodeURIComponent(title)}`);
+      const notes = String(item.notes || "").trim() ||
+        (!isManualReport ? `Auto-detected (${launcher || "Unknown"}) · ${referenceUrl}` : "");
       const userSettings = parseSettingsList(item.recommended_settings);
       const srPreset = item.recommended_sr_preset ? String(item.recommended_sr_preset).trim() : null;
       const rrPreset = item.recommended_rr_preset ? String(item.recommended_rr_preset).trim() : null;
@@ -171,17 +180,18 @@ export async function onRequestPost(context) {
         officialMap.get(title.toLowerCase()) ||
         (appIds[0] ? officialMap.get(`appid:${appIds[0].toLowerCase()}`) : null);
 
-      const defaultAnticheat =
-        worksStatus === "broken"
-          ? "blocked"
-          : [
-              "safe",
-              "signed_only",
-              "driver_override_only",
-              "blocked",
-            ].includes(item.anticheat_status)
-          ? item.anticheat_status
-          : existingOfficial?.anticheat_status || "safe";
+      const defaultAnticheat = !isManualReport
+        ? existingOfficial?.anticheat_status || "unverified"
+        : worksStatus === "broken"
+        ? "blocked"
+        : [
+            "safe",
+            "signed_only",
+            "driver_override_only",
+            "blocked",
+          ].includes(item.anticheat_status)
+        ? item.anticheat_status
+        : existingOfficial?.anticheat_status || "safe";
 
       // If this is an automatic background scan ("auto_scan"), only report truly new games or missing techs
       // so we never waste Cloudflare D1 Free Tier writes!
