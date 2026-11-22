@@ -3106,6 +3106,15 @@
 
     document.getElementById("search").addEventListener("input", renderGames);
     document.getElementById("ac-filter").addEventListener("change", renderGames);
+    [50, 250, 700, 1500].forEach((ms) => {
+      setTimeout(() => {
+        const s = document.getElementById("search");
+        if (s && s.value.includes("@")) {
+          s.value = "";
+          renderGames();
+        }
+      }, ms);
+    });
     init();
   </script>
 </body>
